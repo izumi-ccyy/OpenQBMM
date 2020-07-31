@@ -38,20 +38,20 @@ Foam::eigenSolver::eigenSolver
 (
     const scalarSquareMatrix& A
 )
-:
+:   // constructor initialize list for five private data
     eigenvaluesRe_(A.n()),
     eigenvaluesIm_(A.n()),
     eigenvectors_(A.n(), A.n()),
     H_(),
     n_(A.n())
 {
-    if (isSymmetric(A))
+    if (isSymmetric(A))             // if A is symmetric
     {
         eigenvectors_ = A;
         tridiagonaliseSymmMatrix();
         symmTridiagonalQL();
     }
-    else
+    else                            // if A is not symmetric
     {
         H_ = A;
         Hessenberg();
@@ -67,13 +67,13 @@ Foam::eigenSolver::eigenSolver(const scalarSquareMatrix& A, bool symmetric)
     H_(),
     n_(A.n())
 {
-    if (symmetric)
+    if (symmetric)                  // if A is symmetric
     {
         eigenvectors_ = A;
         tridiagonaliseSymmMatrix();
         symmTridiagonalQL();
     }
-    else
+    else                            // if A is not symmetric
     {
         H_ = A;
         Hessenberg();
