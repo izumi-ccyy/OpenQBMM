@@ -40,6 +40,7 @@ Foam::populationBalanceModel::New
     const surfaceScalarField& phi
 )
 {
+    // read population balance model type from dict
     word populationBalanceModelType(dict.lookup("populationBalanceModel"));
 
     Info<< "Selecting populationBalanceModel "
@@ -48,6 +49,7 @@ Foam::populationBalanceModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(populationBalanceModelType);
 
+    // if it cannot be found, output error message
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorInFunction
@@ -58,6 +60,7 @@ Foam::populationBalanceModel::New
             << abort(FatalError);
     }
 
+    // if it is found, return a pointer
     return
         autoPtr<populationBalanceModel>
         (

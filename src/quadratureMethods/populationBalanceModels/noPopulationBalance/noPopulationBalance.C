@@ -55,7 +55,7 @@ Foam::populationBalanceModels::noPopulationBalance::noPopulationBalance
     const dictionary& dict,
     const surfaceScalarField& phi
 )
-:
+:   // using constructor of popularBalanceModel
     populationBalanceModel(name, dict, phi),
     name_(name)
 {}
