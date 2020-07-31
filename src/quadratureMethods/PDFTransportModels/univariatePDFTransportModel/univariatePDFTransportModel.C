@@ -42,8 +42,10 @@ Foam::PDFTransportModels::univariatePDFTransportModel
     const word& support
 )
 :
-    PDFTransportModel(name, dict, mesh),
-    quadrature_(name, mesh, support),
+    // initialize the part of PDFTransportModel
+    PDFTransportModel(name, dict, mesh), 
+    // initialize the part of the derived univariatePDFTransportModel   
+    quadrature_(name, mesh, support),       
     momentAdvection_
     (
         univariateMomentAdvection::New
