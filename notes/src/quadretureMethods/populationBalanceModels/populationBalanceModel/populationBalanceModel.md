@@ -12,8 +12,9 @@
       2. [noPopulationBalance.H](#nopopulationbalanceh)
       3. [noPopulationBalance.C](#nopopulationbalancec)
    4. [univariatePopulationBalance](#univariatepopulationbalance)
-      1. [univariatePopulationBalance.H](#univariatepopulationbalanceh)
-      2. [univariatePopulationBalance.C](#univariatepopulationbalancec)
+      1. [Description](#description-2)
+      2. [univariatePopulationBalance.H](#univariatepopulationbalanceh)
+      3. [univariatePopulationBalance.C](#univariatepopulationbalancec)
    5. [mixingPopulationBalance](#mixingpopulationbalance)
       1. [mixingPopulationBalance.H](#mixingpopulationbalanceh)
       2. [mixingPopulationBalance.C](#mixingpopulationbalancec)
@@ -30,7 +31,7 @@
 
 Abstract class for the run-time selection of the population balance model. Base class for mixingPopulationBalance, univariatePopulationBalance, velocityPopulationBalance, noPopulationBalance, and sizeVelocityPopulationBalance.
 
-![inherit graph of population balance model](class_foam_1_1population_balance_model__inherit__graph.png)
+![inherit graph of population balance model](./fig/class_foam_1_1population_balance_model__inherit__graph.png)
 
 ### populationBalanceModel.H
 
@@ -206,6 +207,12 @@ void Foam::populationBalanceModels::noPopulationBalance::solve()
 `solver()` is void.
 
 ## univariatePopulationBalance
+
+### Description
+
+Solve a univariate population balance equation with the extended quadrature method of moments.
+
+![inherit graph of univariate population balance model](./fig/class_foam_1_1_p_d_f_transport_models_1_1population_balance_models_1_1univariate_population_balance__inherit__graph.png)
 
 ### univariatePopulationBalance.H
 
