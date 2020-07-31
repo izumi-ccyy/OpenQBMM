@@ -3,6 +3,9 @@
 1. [pbeFoam](#pbefoam)
    1. [createSingleCellMesh.H](#createsinglecellmeshh)
    2. [createFields.H](#createfieldsh)
+   3. [readControls.H](#readcontrolsh)
+   4. [output.H](#outputh)
+   5. [pbeFoam.C](#pbefoamc)
 
 ## createSingleCellMesh.H
 
@@ -115,3 +118,77 @@ autoPtr<populationBalanceModel> populationBalance
 ```
 
 Read population balance properties and define population balance model. 
+
+## readControls.H
+
+```cpp
+if (runTime.controlDict().lookupOrDefault("suppressSolverInfo", false))
+{
+    lduMatrix::debug = 0;
+}
+```
+
+Read `suppressSolverInfo` in `controlDict`.
+
+## output.H
+
+```cpp
+runTime.write();
+
+volScalarField moment0
+(
+    mesh.lookupObject<volScalarField>("moment.0.populationBalance")
+);
+
+Info<< "moment.0 = " << moment0[0] << endl;
+```
+
+Output `moment.0`.
+
+## pbeFoam.C
+
+```cpp
+int main(int argc, char *argv[])
+{
+    argList::noParallel();
+
+    #define CREATE_MESH createSingleCellMesh.H
+    #define NO_CONTROL
+    #include "postProcess.H"
+
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createSingleCellMesh.H"
+    #include "createFields.H"
+
+    turbulence->validate();
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    Info<< "\nStarting time loop\n" << endl;
+
+    while (runTime.run())
+    {
+        #include "readControls.H"
+
+        runTime++;
+        Info<< "Time = " << runTime.timeName() << nl << endl;
+
+        turbulence->validate();
+        populationBalance->solve();
+
+        #include "output.H"
+
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
+    }
+
+    Info << "Number of steps = " << runTime.timeIndex() << endl;
+    Info << "End" << nl << endl;
+
+    return 0;
+}
+```
+
+Solve population balance equation in a single cell.
