@@ -469,3 +469,4 @@ Foam::moment<fieldType, nodeType>::clone() const
 This function is not implemented and return a null pointer.
 
 ##### update()
+

@@ -166,8 +166,9 @@ void Foam::moment<fieldType, nodeType>::update()
 {
     // Resetting the moment to zero
     fieldType& moment(*this);
+    // why ==
     moment == dimensionedScalar("moment", (*this).dimensions(), 0);
-
+    // declare and assign value to scalar and velocity indexes
     const mappedPtrList<nodeType>& nodes = nodes_();
     const labelList& scalarIndexes = nodes[0].scalarIndexes();
     const labelList& velocityIndexes = nodes[0].velocityIndexes();
@@ -175,26 +176,34 @@ void Foam::moment<fieldType, nodeType>::update()
     // If nodes are not of extended type, only use primary quadrature.
     if (!nodes[0].extended())
     {
+        // for every node
         forAll(nodes, pNodei)
-        {
+        {   
+            // get current node
             const nodeType& node = nodes[pNodei];
+            // get primary weight m
             fieldType m = node.primaryWeight();
-
+            // for every scalar internal coordinate
             for (label cmpt = 0; cmpt < scalarIndexes.size(); cmpt++)
             {
+                // get current scalar index
                 label cmpti = scalarIndexes[cmpt];
+                // get moment order for current index 
                 const label cmptMomentOrder = cmptOrders()[cmpti];
 
                 tmp<fieldType> abscissaCmpt =
                     node.primaryAbscissae()[cmpt];
-
+                // get mPow = m * abscissaCmpt^cmptMomentOrder
                 tmp<fieldType> mPow = m*pow(abscissaCmpt, cmptMomentOrder);
+                // reset dimension of m as mpow
                 m.dimensions().reset(mPow().dimensions());
-
+                // let m == mPow, why ==
                 m == mPow;
             }
+            // for every component of velocity internal coordinate
             for (label cmpt = 0; cmpt < velocityIndexes.size(); cmpt++)
             {
+                // almost the same with scalar
                 label cmpti = velocityIndexes[cmpt];
                 const label cmptMomentOrder = cmptOrders()[cmpti];
 
@@ -206,23 +215,25 @@ void Foam::moment<fieldType, nodeType>::update()
 
                 m == mPow;
             }
-
+            // moment == moment + m, why ==
             moment == moment + m;
         }
-
+        // end
         return;
     }
 
     // Extended quadrature case
     forAll(nodes, pNodei)
     {
+        // get node and primary weight
         const nodeType& node = nodes[pNodei];
         const fieldType& pW = node.primaryWeight();
-
+        // for every secondary node
         for (label sNodei = 0; sNodei < node.nSecondaryNodes(); sNodei++)
         {
+            // assign pW to m
             fieldType m(pW);
-
+            // for every scalar
             for (label cmpt = 0; cmpt < scalarIndexes.size(); cmpt++)
             {
                 label cmpti = scalarIndexes[cmpt];
@@ -230,15 +241,17 @@ void Foam::moment<fieldType, nodeType>::update()
 
                 tmp<fieldType> abscissaCmpt
                         = node.secondaryAbscissae()[cmpt][sNodei];
-
+                // mPow = m * secondaryWeights * abscissaCmpt^cmptMomentOrder
                 tmp<fieldType> mPow =
                     m
                    *node.secondaryWeights()[cmpt][sNodei]
                    *pow(abscissaCmpt, cmptMomentOrder);
-
+                // set dimension of m
                 m.dimensions().reset(mPow().dimensions());
+                // m == mPow
                 m == mPow;
             }
+            // for every component of velocity
             for (label cmpt = 0; cmpt < velocityIndexes.size(); cmpt++)
             {
                 label cmpti = velocityIndexes[cmpt];
