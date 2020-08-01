@@ -6,7 +6,7 @@
 
 ### Description
 
-Provides storage for the moments and the corresponding quadrature approximation of a distribution function. Methods to update the moments and the quadrature approximation are provided.
+Provides storage for the moments and the corresponding quadrature approximation of a distribution function. Methods to update the moments and the quadrature approximation are provided. **This is defined as class template so that it can be used  for both scalar and velocity moments.**
 
 ![inherit graph of quadrature approximation](./fig/class_foam_1_1quadrature_approximation__inherit__graph.png)
 
@@ -59,20 +59,20 @@ protected:
 
 Declare protected data: 
 
-* a moment type `momentFieldsSet` containing moment type and node type;
-* name of the quadrature approximation `name_`;
-* mesh `mesh_`;
-* dictionary `dict_`;
-* a list `momentOrders` containing moment orders;
-* a list `nodeIndes_` containing node indexes
-* a number `nNodes_` representing number of nodes in each directions;
-* an AutoPtr for nodes `nodes_`;
-* a List of moments `moments_`;
-* Dimensionality of the distribution function `nDimensions_`;
-* number of moments `nMoments_`;
-* number of secondary nodes `nSecondaryNodes_`;
-* support of the distribution function `suport_`;
-* an AutoPtr for extended moment inversion method `momentFieldInverter_`
+* `momentFieldsSet`: a moment type containing moment type and node type;
+* `name_`: name of the quadrature approximation;
+* `mesh_`: mesh;
+* `dict_`: dictionary;
+* `momentOrders`: a list containing moment orders;
+* `nodeIndes_`: a list containing node indexes
+* `nNodes_`: a number representing number of nodes in each directions;
+* `nodes_`: an AutoPtr for nodes;
+* `moments_`: a List of moments;
+* `nDimensions_`: Dimensionality of the distribution function;
+* `nMoments_`: number of moments;
+* `nSecondaryNodes_`: number of secondary nodes;
+* `suport_`: support of the distribution function;
+* `momentFieldInverter_`: an AutoPtr for extended moment inversion method.
 
 ```cpp
 public:
@@ -151,7 +151,7 @@ Declare constructors and destructors.
             inline const labelListList& nodeIndexes() const;
 ```
 
-Declare public member functions:
+Declare public member functions returning the protected data:
 
 * `name()`: return `name_`;
 * `nNodes`: return `nNodes_`;
@@ -209,6 +209,98 @@ Include `quadratureApproximationI.H` and `quadratureApproximation.C`
 
 ### quadratureApproximationI.H
 
+```cpp
+template <class momentType, class nodeType>
+const word
+Foam::quadratureApproximation<momentType, nodeType>::name() const
+{
+    return name_;
+}
+
+template <class momentType, class nodeType>
+const labelList&
+Foam::quadratureApproximation<momentType, nodeType>::nNodes() const
+{
+    return nNodes_;
+}
+
+template <class momentType, class nodeType>
+Foam::fieldMomentInversion&
+Foam::quadratureApproximation<momentType, nodeType>
+::momentFieldInverter()
+{
+    return momentFieldInverter_();
+}
+
+template <class momentType, class nodeType>
+const Foam::mappedPtrList<nodeType>&
+Foam::quadratureApproximation<momentType, nodeType>::nodes() const
+{
+    return nodes_();
+}
+
+template <class momentType, class nodeType>
+Foam::mappedPtrList<nodeType>&
+Foam::quadratureApproximation<momentType, nodeType>::nodes()
+{
+    return nodes_();
+}
+
+template <class momentType, class nodeType>
+const momentFieldSet<momentType, nodeType>&
+Foam::quadratureApproximation<momentType, nodeType>::moments() const
+{
+    return moments_;
+}
+
+template <class momentType, class nodeType>
+momentFieldSet<momentType, nodeType>&
+Foam::quadratureApproximation<momentType, nodeType>::moments()
+{
+    return moments_;
+}
+
+template <class momentType, class nodeType>
+Foam::label
+Foam::quadratureApproximation<momentType, nodeType>::nDimensions() const
+{
+    return nDimensions_;
+}
+
+template <class momentType, class nodeType>
+Foam::label
+Foam::quadratureApproximation<momentType, nodeType>::nMoments() const
+{
+    return nMoments_;
+}
+
+template <class momentType, class nodeType>
+const Foam::labelListList&
+Foam::quadratureApproximation<momentType, nodeType>::momentOrders() const
+{
+    return momentOrders_;
+}
+
+template <class momentType, class nodeType>
+const Foam::labelListList&
+Foam::quadratureApproximation<momentType, nodeType>::nodeIndexes() const
+{
+    return nodeIndexes_;
+}
+```
+
+Definitions of public member functions that returning the protected variables. **It is worthy to note that these functions are defined as template.**
+
 ### quadratureApproximations.H
+
+```cpp
+typedef quadratureApproximation<volScalarMoment, volScalarNode>
+    scalarQuadratureApproximation;
+
+typedef quadratureApproximation<volVelocityMoment, volVelocityNode>
+    velocityQuadratureApproximation;
+```
+
+Define a shorter name for this class for both scalar moment and velocity moment.
 
 ### quadratureApproximation.C

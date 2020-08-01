@@ -63,6 +63,7 @@ namespace Foam
                 Class univariateQuadratureApproximation Declaration
 \*---------------------------------------------------------------------------*/
 
+// it is a class template
 template <class momentType, class nodeType>
 class quadratureApproximation
 :
