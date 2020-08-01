@@ -4,8 +4,9 @@
    1. [quadratureApproximation](#quadratureapproximation)
       1. [Description](#description)
       2. [quadratureApproximation.H](#quadratureapproximationh)
-         1. [Protected data](#protected-data)
-         2. [Public data and member functions](#public-data-and-member-functions)
+         1. [Include](#include)
+         2. [Protected data](#protected-data)
+         3. [Public data and member functions](#public-data-and-member-functions)
       3. [quadratureApproximationI.H](#quadratureapproximationih)
       4. [quadratureApproximations.H](#quadratureapproximationsh)
       5. [quadratureApproximation.C](#quadratureapproximationc)
@@ -24,6 +25,20 @@ Provides storage for the moments and the corresponding quadrature approximation 
 ![inherit graph of quadrature approximation](./fig/class_foam_1_1quadrature_approximation__inherit__graph.png)
 
 ### quadratureApproximation.H
+
+#### Include
+
+```cpp
+#include "fvCFD.H"
+#include "IOdictionary.H"
+#include "mappedPtrList.H"
+#include "fvMesh.H"
+#include "volFields.H"
+#include "surfaceFields.H"
+#include "fieldMomentInversion.H"
+#include "volVelocityNode.H"
+#include "surfaceVelocityNode.H"
+```
 
 #### Protected data
 
