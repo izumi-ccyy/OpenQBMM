@@ -1,6 +1,17 @@
 # Quadrature Approximations
 
 1. [Quadrature Approximations](#quadrature-approximations)
+   1. [quadratureApproximation](#quadratureapproximation)
+      1. [Description](#description)
+      2. [quadratureApproximation.H](#quadratureapproximationh)
+         1. [Protected data](#protected-data)
+         2. [Public data and member functions](#public-data-and-member-functions)
+      3. [quadratureApproximationI.H](#quadratureapproximationih)
+      4. [quadratureApproximations.H](#quadratureapproximationsh)
+      5. [quadratureApproximation.C](#quadratureapproximationc)
+         1. [Constructors](#constructors)
+         2. [Destructor](#destructor)
+         3. [Member functions](#member-functions)
 
 ## quadratureApproximation
 
@@ -11,6 +22,8 @@ Provides storage for the moments and the corresponding quadrature approximation 
 ![inherit graph of quadrature approximation](./fig/class_foam_1_1quadrature_approximation__inherit__graph.png)
 
 ### quadratureApproximation.H
+
+#### Protected data
 
 ```cpp
 protected:
@@ -74,6 +87,8 @@ Declare protected data:
 * `suport_`: support of the distribution function;
 * `momentFieldInverter_`: an AutoPtr for extended moment inversion method.
 
+#### Public data and member functions
+
 ```cpp
 public:
 
@@ -110,7 +125,7 @@ Declare name of the phase properties dictionary.
     virtual ~quadratureApproximation();
 ```
 
-Declare constructors and destructors.
+Declare constructors and destructors. **It is worthy to note that there are two constructors. One of them is constructed from name, mesh and support. The other is constructed from one more vaiable calcQuadratureOnCreation.**
 
 ```cpp
     // Member Functions
@@ -304,3 +319,17 @@ typedef quadratureApproximation<volVelocityMoment, volVelocityNode>
 Define a shorter name for this class for both scalar moment and velocity moment.
 
 ### quadratureApproximation.C
+
+```cpp
+template<class momentType, class nodeType>
+const Foam::word Foam::quadratureApproximation<momentType, nodeType>::
+propertiesName("quadratureProperties");
+```
+
+Initialize `propertiesName` as `quadratureProperties`.
+
+#### Constructors
+
+#### Destructor
+
+#### Member functions
