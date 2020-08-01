@@ -66,7 +66,7 @@ namespace Foam
 /*---------------------------------------------------------------------------*\
                          Class moment Declaration
 \*---------------------------------------------------------------------------*/
-
+// class template
 template <class fieldType, class nodeType>
 class moment
 :
@@ -130,12 +130,13 @@ public:
         //  from Istream
         class iNew
         {
+            // private data
             const word& distributionName_;
             const fvMesh& mesh_;
             const autoPtr<mappedPtrList<nodeType>>& nodes_;
 
         public:
-
+            // constructor
             iNew
             (
                 const word& distributionName,
@@ -147,7 +148,7 @@ public:
                 mesh_(mesh),
                 nodes_(nodes)
             {}
-
+            // return a pointer for a new moment based on input
             autoPtr<moment<fieldType, nodeType>> operator()(Istream& is) const
             {
                 labelList ent(is);
