@@ -90,13 +90,13 @@ void Foam::PDFTransportModels::univariatePDFTransportModel::solve()
             )
         );
     }
-    
+    // relax and solve moment equations
     forAll (momentEqns, mEqni)
     {
         momentEqns[mEqni].relax();
         momentEqns[mEqni].solve();
     }
-    
+    // update quadratures
     quadrature_.updateQuadrature();
 
     if (solveMomentSources())

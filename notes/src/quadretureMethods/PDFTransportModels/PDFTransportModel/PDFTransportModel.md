@@ -159,6 +159,12 @@ Define member function `inline const scalarQuadratureApproximation& quadrature()
 ### univariatePDFTransportModel.C
 
 ```cpp
+Foam::PDFTransportModels::univariatePDFTransportModel
+::~univariatePDFTransportModel()
+{}
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
 void Foam::PDFTransportModels::univariatePDFTransportModel::solve()
 {
     momentAdvection_().update();
@@ -183,13 +189,13 @@ void Foam::PDFTransportModels::univariatePDFTransportModel::solve()
             )
         );
     }
-    
+    // relax and solve moment equations
     forAll (momentEqns, mEqni)
     {
         momentEqns[mEqni].relax();
         momentEqns[mEqni].solve();
     }
-    
+    // update quadratures
     quadrature_.updateQuadrature();
 
     if (solveMomentSources())
