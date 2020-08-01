@@ -84,6 +84,7 @@ Foam::moment<fieldType, nodeType>::moment
     const autoPtr<mappedPtrList<nodeType>>& nodes
 )
 :
+    // create field type
     fieldType
     (
         IOobject
@@ -96,6 +97,7 @@ Foam::moment<fieldType, nodeType>::moment
         ),
         mesh
     ),
+    // initialize private data with arguments
     distributionName_(distributionName),
     nodes_(nodes),
     cmptOrders_(cmptOrders),
@@ -114,6 +116,7 @@ Foam::moment<fieldType, nodeType>::moment
     const word momentSetName
 )
 :
+    // initialize private data
     fieldType
     (
         momentName

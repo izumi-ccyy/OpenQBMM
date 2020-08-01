@@ -23,6 +23,10 @@
          2. [Constructors](#constructors)
             1. [Constructor 1](#constructor-1)
             2. [Constructor 2](#constructor-2)
+         3. [Destructor](#destructor-1)
+         4. [Member functions](#member-functions-1)
+            1. [clone()](#clone)
+            2. [update()](#update)
 
 ## Moment
 
@@ -362,4 +366,106 @@ Convert a list of labels to a word or a single label.
 
 ##### Constructor 1
 
+```cpp
+template <class fieldType, class nodeType>
+Foam::moment<fieldType, nodeType>::moment
+(
+    const word& distributionName,
+    const labelList& cmptOrders,
+    const fvMesh& mesh,
+    const autoPtr<mappedPtrList<nodeType>>& nodes
+)
+:
+    // create field type
+    fieldType
+    (
+        IOobject
+        (
+            momentName("moment", listToWord(cmptOrders), distributionName),
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+    // initialize private data with arguments
+    distributionName_(distributionName),
+    nodes_(nodes),
+    cmptOrders_(cmptOrders),
+    name_(momentName("moment", listToWord(cmptOrders_), distributionName_)),
+    nDimensions_(cmptOrders_.size()),
+    order_(sum(cmptOrders_))
+{}
+```
+
+Construct from a list of orders of each dimension of the moment and the quadrature nodes.
+
 ##### Constructor 2
+
+```cpp
+template <class fieldType, class nodeType>
+Foam::moment<fieldType, nodeType>::moment
+(
+    const word& distributionName,
+    const labelList& cmptOrders,
+    const autoPtr<mappedPtrList<nodeType>>& nodes,
+    const fieldType& initMoment,
+    const word momentSetName
+)
+:
+    // initialize private data
+    fieldType
+    (
+        momentName
+        (
+            "moment" + momentSetName,
+            listToWord(cmptOrders),
+            distributionName
+        ),
+        initMoment
+    ),
+    distributionName_(distributionName),
+    nodes_(nodes),
+    cmptOrders_(cmptOrders),
+    name_
+    (
+        momentName
+        (
+            "moment" + momentSetName,
+            listToWord(cmptOrders),
+            distributionName
+        )
+    ),
+    nDimensions_(cmptOrders_.size()),
+    order_(sum(cmptOrders_))
+{}
+```
+
+Construct from name, orders, and quadrature nodes.
+
+#### Destructor
+
+```cpp
+template <class fieldType, class nodeType>
+Foam::moment<fieldType, nodeType>::~moment()
+{}
+```
+
+#### Member functions
+
+##### clone()
+
+```cpp
+template <class fieldType, class nodeType>
+Foam::autoPtr<Foam::moment<fieldType, nodeType>>
+Foam::moment<fieldType, nodeType>::clone() const
+{
+    NotImplemented;
+    return nullptr;
+}
+```
+
+This function is not implemented and return a null pointer.
+
+##### update()
