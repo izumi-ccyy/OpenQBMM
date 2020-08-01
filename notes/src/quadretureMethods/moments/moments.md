@@ -19,6 +19,10 @@
       3. [momentI.H](#momentih)
       4. [moments.H](#momentsh)
       5. [moment.C](#momentc)
+         1. [Static member functions](#static-member-functions)
+         2. [Constructors](#constructors)
+            1. [Constructor 1](#constructor-1)
+            2. [Constructor 2](#constructor-2)
 
 ## Moment
 
@@ -319,3 +323,43 @@ Rename moment types:
 ### moment.C
 
 Static member functions, constructors, destructor and member functions for access and to edit etc. are defined in `moment.C`
+
+#### Static member functions
+
+```cpp
+template <class fieldType, class nodeType>
+Foam::word
+Foam::moment<fieldType, nodeType>::listToWord(const labelList& lst)
+{
+    word w;
+
+    forAll(lst, dimi)
+    {
+        w += Foam::name(lst[dimi]);
+    }
+
+    return w;
+}
+
+template <class fieldType, class nodeType>
+Foam::label
+Foam::moment<fieldType, nodeType>::listToLabel(const labelList& lst)
+{
+    label l = 0;
+
+    forAll(lst, dimi)
+    {
+        l += lst[dimi]*pow(scalar(10), lst.size() - dimi - 1);
+    }
+
+    return l;
+}
+```
+
+Convert a list of labels to a word or a single label.
+
+#### Constructors
+
+##### Constructor 1
+
+##### Constructor 2
