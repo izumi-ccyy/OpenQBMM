@@ -97,6 +97,7 @@ quadratureApproximation
     momentFieldInverter_()
 // function body
 {
+    // obtain number of nodes nNodes_
     forAll(nodeIndexes_, nodei)
     {
         forAll(nNodes_, dimi)
@@ -104,16 +105,19 @@ quadratureApproximation
             nNodes_[dimi] = max(nNodes_[dimi], nodeIndexes_[nodei][dimi] + 1);
         }
     }
-
+    // define and initialize abscissaeDimensions
     PtrList<dimensionSet> abscissaeDimensions(momentOrders_[0].size());
+    // define zeroOrder and velocityIndexes
     labelList zeroOrder(momentOrders_[0].size(), 0);
     labelList velocityIndexes;
-
+    // for every abscissaeDimension
     forAll(abscissaeDimensions, dimi)
     {
+        // define and initialize firstOrder with zeroOrder
         labelList firstOrder(zeroOrder);
+        // firstOrder[dimi] = 1
         firstOrder[dimi] = 1;
-
+        // obtain the dimension of moments and store it in dimi
         abscissaeDimensions.set
         (
             dimi,
@@ -122,18 +126,20 @@ quadratureApproximation
                 moments_(firstOrder).dimensions()/moments_(0).dimensions()
             )
         );
-
+        // determine if the dimi is dimension of velocity
         if (abscissaeDimensions[dimi] == dimVelocity)
         {
+            // if so, append dimi to velocityIndexes
             velocityIndexes.append(dimi);
         }
     }
-
+    // if velocityIndexes is empty
     if (velocityIndexes.size() == 0)
     {
+        // append -1 to it
         velocityIndexes.append(-1);
     }
-
+    // allocate space for momentFieldInverter_
     momentFieldInverter_ =
         fieldMomentInversion::New
         (
@@ -163,23 +169,24 @@ quadratureApproximation
             )
         )
     );
-
+    // set node map
     nodes_().setMap(mappedPtrList<scalar>(nodes_().size(), nodeIndexes_).map());
-
+    // update quadrature, namely update momentFieldInverter_ and moments
     updateQuadrature();
 }
 
-
+// the parameters are different, so the initialization method is different
 template<class momentType, class nodeType>
 Foam::quadratureApproximation<momentType, nodeType>::
 quadratureApproximation
 (
+    // different parameters
     const word& dictName,
     const word& name,
     const momentFieldSetType& mFieldSet,
     bool calcQuadratureOnCreation
 )
-:
+:   // define IO object of dictionary with mFieldSet
     IOdictionary
     (
         IOobject
@@ -192,6 +199,7 @@ quadratureApproximation
             false
         )
     ),
+    // mFieldSet is used to initialize variables
     name_(name),
     mesh_(mFieldSet[0].mesh()),
     dict_(*this),
@@ -211,6 +219,7 @@ quadratureApproximation
     ),
     nNodes_(momentOrders_[0].size(), 1),
     nodes_(),
+    // another method to construct moments
     moments_
     (
         name_,
@@ -228,7 +237,9 @@ quadratureApproximation
     ),
     support_(mFieldSet.support()),
     momentFieldInverter_()
+// function body 
 {
+    // same method to obtain nNodes_
     forAll(nodeIndexes_, nodei)
     {
         forAll(nNodes_, dimi)
@@ -236,9 +247,10 @@ quadratureApproximation
             nNodes_[dimi] = max(nNodes_[dimi], nodeIndexes_[nodei][dimi] + 1);
         }
     }
-
+    // for every moments
     forAll(moments_, mi)
     {
+        // set moments_
         moments_.set
         (
             mi,
@@ -251,11 +263,11 @@ quadratureApproximation
             )
         );
     }
-
+    // same method to declare abscissaeDimensions etc.
     PtrList<dimensionSet> abscissaeDimensions(momentOrders_[0].size());
     labelList zeroOrder(momentOrders_[0].size(), 0);
     labelList velocityIndexes;
-
+    // same
     forAll(abscissaeDimensions, dimi)
     {
         labelList firstOrder(zeroOrder);
@@ -275,7 +287,7 @@ quadratureApproximation
             velocityIndexes.append(dimi);
         }
     }
-
+    // same
     momentFieldInverter_ =
         fieldMomentInversion::New
         (
@@ -286,7 +298,7 @@ quadratureApproximation
             velocityIndexes,
             nSecondaryNodes_
         );
-
+    // if there is secondary nodes, extended quadrature should be adopted
     if (nSecondaryNodes_ != 0 && !momentFieldInverter_().extended())
     {
         WarningInFunction
@@ -296,7 +308,7 @@ quadratureApproximation
             << "    Proceeding with nSecondaryNodes = 0." << nl
             << "    No extended quadrature will be computed." << nl;
     }
-
+    // same
     // Allocating nodes
     nodes_ = autoPtr<mappedPtrList<nodeType>>
     (
@@ -315,9 +327,9 @@ quadratureApproximation
             )
         )
     );
-
+    // same
     nodes_().setMap(mappedPtrList<scalar>(nodes_().size(), nodeIndexes_).map());
-
+    // determine whether to update
     if (calcQuadratureOnCreation)
     {
         updateQuadrature();

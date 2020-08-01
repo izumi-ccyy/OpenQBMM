@@ -10,6 +10,8 @@
       4. [quadratureApproximations.H](#quadratureapproximationsh)
       5. [quadratureApproximation.C](#quadratureapproximationc)
          1. [Constructors](#constructors)
+            1. [Constructor 1](#constructor-1)
+            2. [Constructor 2](#constructor-2)
          2. [Destructor](#destructor)
          3. [Member functions](#member-functions)
 
@@ -330,7 +332,312 @@ Initialize `propertiesName` as `quadratureProperties`.
 
 #### Constructors
 
+##### Constructor 1
 
+```cpp
+template<class momentType, class nodeType>
+Foam::quadratureApproximation<momentType, nodeType>::
+quadratureApproximation
+(
+    const word& name,
+    const fvMesh& mesh,
+    const word& support
+)
+:
+    // define IO object of dictionary
+    IOdictionary
+    (
+        IOobject
+        (
+            IOobject::groupName("quadratureProperties", name),
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    // initialize name_, mesh_, dict_ with argument and current object
+    name_(name),
+    mesh_(mesh),
+    dict_(*this),
+    // initialize momentOrders_ by the entry of moments in the dict_
+    momentOrders_
+    (
+        const_cast
+        <
+            const quadratureApproximation<momentType, nodeType>&
+        >(*this).lookup("moments")
+    ),
+    // initialize momentOrders_ by the entry of nodes in the dict_
+    nodeIndexes_
+    (
+        const_cast
+        <
+            const quadratureApproximation<momentType, nodeType>&
+        >(*this).lookup("nodes")
+    ),
+    // initialize nNodes_, nodes_, moments_, nDimensions_, nMoments_ with momentOrders_ etc.
+    nNodes_(momentOrders_[0].size(), 1),
+    nodes_(),
+    moments_(name_, *this, mesh_, nodes_, support),
+    nDimensions_(moments_[0].cmptOrders().size()),
+    nMoments_(moments_.size()),
+    // initialize nSecondaryNodes_ with dict_ or default value
+    nSecondaryNodes_
+    (
+        lookupOrDefault<label>("nSecondaryNodes", nMoments_ + 1)
+    ),
+    // initialize support with argument
+    support_(support),
+    // initialize momentFieldInverter_
+    momentFieldInverter_()
+// function body
+{
+    // obtain number of nodes nNodes_
+    forAll(nodeIndexes_, nodei)
+    {
+        forAll(nNodes_, dimi)
+        {
+            nNodes_[dimi] = max(nNodes_[dimi], nodeIndexes_[nodei][dimi] + 1);
+        }
+    }
+    // define and initialize abscissaeDimensions
+    PtrList<dimensionSet> abscissaeDimensions(momentOrders_[0].size());
+    // define zeroOrder and velocityIndexes
+    labelList zeroOrder(momentOrders_[0].size(), 0);
+    labelList velocityIndexes;
+    // for every abscissaeDimension
+    forAll(abscissaeDimensions, dimi)
+    {
+        // define and initialize firstOrder with zeroOrder
+        labelList firstOrder(zeroOrder);
+        // firstOrder[dimi] = 1
+        firstOrder[dimi] = 1;
+        // obtain the dimension of moments and store it in dimi
+        abscissaeDimensions.set
+        (
+            dimi,
+            new dimensionSet
+            (
+                moments_(firstOrder).dimensions()/moments_(0).dimensions()
+            )
+        );
+        // determine if the dimi is dimension of velocity
+        if (abscissaeDimensions[dimi] == dimVelocity)
+        {
+            // if so, append dimi to velocityIndexes
+            velocityIndexes.append(dimi);
+        }
+    }
+    // if velocityIndexes is empty
+    if (velocityIndexes.size() == 0)
+    {
+        // append -1 to it
+        velocityIndexes.append(-1);
+    }
+    // allocate space for momentFieldInverter_
+    momentFieldInverter_ =
+        fieldMomentInversion::New
+        (
+            (*this),
+            mesh_,
+            momentOrders_,
+            nodeIndexes_,
+            velocityIndexes,
+            nSecondaryNodes_
+        );
+
+    // Allocating nodes
+    nodes_ = autoPtr<mappedPtrList<nodeType>>
+    (
+        new mappedPtrList<nodeType>
+        (
+            lookup("nodes"),
+            typename nodeType::iNew
+            (
+                name_,
+                mesh_,
+                moments_[0].dimensions(),
+                abscissaeDimensions,
+                moments_[0].boundaryField().types(),
+                momentFieldInverter_().extended(),
+                nSecondaryNodes_
+            )
+        )
+    );
+    // set node map
+    nodes_().setMap(mappedPtrList<scalar>(nodes_().size(), nodeIndexes_).map());
+    // update quadrature
+    updateQuadrature();
+}
+```
+
+##### Constructor 2
+
+```cpp
+// the parameters are different, so the initialization method is different
+template<class momentType, class nodeType>
+Foam::quadratureApproximation<momentType, nodeType>::
+quadratureApproximation
+(
+    // different parameters
+    const word& dictName,
+    const word& name,
+    const momentFieldSetType& mFieldSet,
+    bool calcQuadratureOnCreation
+)
+:   // define IO object of dictionary with mFieldSet
+    IOdictionary
+    (
+        IOobject
+        (
+            dictName,
+            mFieldSet[0].mesh().time().constant(),
+            mFieldSet[0].mesh(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    ),
+    // mFieldSet is used to initialize variables
+    name_(name),
+    mesh_(mFieldSet[0].mesh()),
+    dict_(*this),
+    momentOrders_
+    (
+        const_cast
+        <
+            const quadratureApproximation<momentType, nodeType>&
+        >(*this).lookup("moments")
+    ),
+    nodeIndexes_
+    (
+        const_cast
+        <
+            const quadratureApproximation<momentType, nodeType>&
+        >(*this).lookup("nodes")
+    ),
+    nNodes_(momentOrders_[0].size(), 1),
+    nodes_(),
+    // another method to construct moments
+    moments_
+    (
+        name_,
+        mFieldSet.size(),
+        nodes_,
+        mFieldSet.nDimensions(),
+        mFieldSet.map(),
+        mFieldSet.support()
+    ),
+    nDimensions_(mFieldSet.nDimensions()),
+    nMoments_(mFieldSet.size()),
+    nSecondaryNodes_
+    (
+        lookupOrDefault<label>("nSecondaryNodes", nMoments_ + 1)
+    ),
+    support_(mFieldSet.support()),
+    momentFieldInverter_()
+// function body 
+{
+    // same method to obtain nNodes_
+    forAll(nodeIndexes_, nodei)
+    {
+        forAll(nNodes_, dimi)
+        {
+            nNodes_[dimi] = max(nNodes_[dimi], nodeIndexes_[nodei][dimi] + 1);
+        }
+    }
+    // for every moments
+    forAll(moments_, mi)
+    {
+        // set moments_
+        moments_.set
+        (
+            mi,
+            new momentType
+            (
+                name_ + Foam::name(mi),
+                mFieldSet[mi].cmptOrders(),
+                nodes_,
+                mFieldSet[mi]
+            )
+        );
+    }
+    // same method to declare abscissaeDimensions etc.
+    PtrList<dimensionSet> abscissaeDimensions(momentOrders_[0].size());
+    labelList zeroOrder(momentOrders_[0].size(), 0);
+    labelList velocityIndexes;
+    // same
+    forAll(abscissaeDimensions, dimi)
+    {
+        labelList firstOrder(zeroOrder);
+        firstOrder[dimi] = 1;
+
+        abscissaeDimensions.set
+        (
+            dimi,
+            new dimensionSet
+            (
+                moments_(firstOrder).dimensions()/moments_(0).dimensions()
+            )
+        );
+        
+        if (abscissaeDimensions[dimi] == dimVelocity)
+        {
+            velocityIndexes.append(dimi);
+        }
+    }
+    // same
+    momentFieldInverter_ =
+        fieldMomentInversion::New
+        (
+            (*this),
+            mesh_,
+            momentOrders_,
+            nodeIndexes_,
+            velocityIndexes,
+            nSecondaryNodes_
+        );
+    // if there is secondary nodes, extended quadrature should be adopted
+    if (nSecondaryNodes_ != 0 && !momentFieldInverter_().extended())
+    {
+        WarningInFunction
+            << "The number of secondary nodes in the quadrature" << nl
+            << "    approximation is not zero, but the selected" << nl
+            << "    inversion algorithm is not of extended type." << nl
+            << "    Proceeding with nSecondaryNodes = 0." << nl
+            << "    No extended quadrature will be computed." << nl;
+    }
+    // same
+    // Allocating nodes
+    nodes_ = autoPtr<mappedPtrList<nodeType>>
+    (
+        new mappedPtrList<nodeType>
+        (
+            lookup("nodes"),
+            typename nodeType::iNew
+            (
+                name_,
+                mesh_,
+                moments_[0].dimensions(),
+                abscissaeDimensions,
+                moments_[0].boundaryField().types(),
+                momentFieldInverter_().extended(),
+                nSecondaryNodes_
+            )
+        )
+    );
+    // same
+    nodes_().setMap(mappedPtrList<scalar>(nodes_().size(), nodeIndexes_).map());
+    // determine whether to update
+    if (calcQuadratureOnCreation)
+    {
+        updateQuadrature();
+    }
+}
+```
+
+The difference between constructor 1 and constructor 2 is that they have different parameters which makes the initialization a little different. Additionally, the method of construction of moments is different in constructor 1 and constructor 2.
 
 #### Destructor
 
