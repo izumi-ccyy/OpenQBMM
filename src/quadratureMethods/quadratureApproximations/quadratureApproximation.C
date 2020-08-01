@@ -48,6 +48,7 @@ quadratureApproximation
     const word& support
 )
 :
+    // define IO object of dictionary
     IOdictionary
     (
         IOobject
@@ -59,9 +60,11 @@ quadratureApproximation
             IOobject::NO_WRITE
         )
     ),
+    // initialize name_, mesh_, dict_ with argument and current object
     name_(name),
     mesh_(mesh),
     dict_(*this),
+    // initialize momentOrders_ by the entry of moments in the dict_
     momentOrders_
     (
         const_cast
@@ -69,6 +72,7 @@ quadratureApproximation
             const quadratureApproximation<momentType, nodeType>&
         >(*this).lookup("moments")
     ),
+    // initialize momentOrders_ by the entry of nodes in the dict_
     nodeIndexes_
     (
         const_cast
@@ -76,17 +80,22 @@ quadratureApproximation
             const quadratureApproximation<momentType, nodeType>&
         >(*this).lookup("nodes")
     ),
+    // initialize nNodes_, nodes_, moments_, nDimensions_, nMoments_ with momentOrders_ etc.
     nNodes_(momentOrders_[0].size(), 1),
     nodes_(),
     moments_(name_, *this, mesh_, nodes_, support),
     nDimensions_(moments_[0].cmptOrders().size()),
     nMoments_(moments_.size()),
+    // initialize nSecondaryNodes_ with dict_ or default value
     nSecondaryNodes_
     (
         lookupOrDefault<label>("nSecondaryNodes", nMoments_ + 1)
     ),
+    // initialize support with argument
     support_(support),
+    // initialize momentFieldInverter_
     momentFieldInverter_()
+// function body
 {
     forAll(nodeIndexes_, nodei)
     {

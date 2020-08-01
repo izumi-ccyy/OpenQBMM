@@ -330,6 +330,88 @@ Initialize `propertiesName` as `quadratureProperties`.
 
 #### Constructors
 
+
+
 #### Destructor
 
+```cpp
+template<class momentType, class nodeType>
+Foam::quadratureApproximation<momentType, nodeType>
+::~quadratureApproximation()
+{}
+```
+
+Define destructor.
+
 #### Member functions
+
+```cpp
+template<class momentType, class nodeType>
+void Foam::quadratureApproximation<momentType, nodeType>
+::updateQuadrature()
+{
+    momentFieldInverter_().invert(moments_, nodes_());
+    updateMoments();
+}
+```
+
+Update quadrature by update moments.
+
+```cpp
+template<class momentType, class nodeType>
+void Foam::quadratureApproximation<momentType, nodeType>
+::updateBoundaryQuadrature()
+{
+    momentFieldInverter_().invertBoundaryMoments(moments_, nodes_());
+    moments_.updateBoundaries();
+}
+```
+
+Update quadrature at boundaries.
+
+```cpp
+template<class momentType, class nodeType>
+void Foam::quadratureApproximation<momentType, nodeType>
+::updateMoments()
+{
+    moments_.update();
+}
+```
+
+Update Moments.
+
+```cpp
+template<class momentType, class nodeType>
+void Foam::quadratureApproximation<momentType, nodeType>
+::updateLocalMoments(label celli)
+{
+    moments_.updateLocalMoments(celli);
+}
+```
+
+Update moment at cell $i$.
+
+```cpp
+template<class momentType, class nodeType>
+bool Foam::quadratureApproximation<momentType, nodeType>
+::updateLocalQuadrature(label celli, bool fatalErrorOnFailedRealizabilityTest)
+{
+    bool realizable = momentFieldInverter_().invertLocalMoments
+    (
+        moments_, nodes_(), celli, false
+    );
+
+    if (!realizable && fatalErrorOnFailedRealizabilityTest)
+    {
+        return realizable;
+    }
+
+    moments_.updateLocalMoments(celli);
+
+    return realizable;
+}
+```
+
+Recalculate quadrature nodes from the moments in the specified cell.
+
+**All these above member functions contain operations of moments, So what is the relation between quadrature and moment?**
