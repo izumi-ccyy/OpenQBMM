@@ -218,13 +218,18 @@ Foam::label Foam::mappedList<mappedType>::calcMapIndex
 template <class mappedType>
 void Foam::mappedList<mappedType>::setSize(const label newSize)
 {
+    // set size of the list
+    // more details should be in class List
     Foam::List<mappedType>::setSize(newSize);
+    // update size of map_
+    // more details should be in class Map 
     map_.resize(newSize);
 }
 
 template <class mappedType>
 void Foam::mappedList<mappedType>::resize(const label newSize)
 {
+    // use setSize to set new size
     (*this).setSize(newSize);
 }
 

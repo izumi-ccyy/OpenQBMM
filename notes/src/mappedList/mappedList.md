@@ -23,6 +23,10 @@
       3. [Destructor](#destructor)
       4. [Member functions](#member-functions)
          1. [calcMapIndex](#calcmapindex)
+         2. [setSize](#setsize)
+         3. [resize](#resize)
+         4. [found 1](#found-1)
+         5. [found 2](#found-2)
 
 ## mappedList.H
 
@@ -389,3 +393,43 @@ Foam::label Foam::mappedList<mappedType>::calcMapIndex
 ```
 
 This function convert a list of numbers into a single number as in the description, the lookup '2 1 0' is converted to the label key '210'.
+
+#### setSize
+
+```cpp
+template <class mappedType>
+void Foam::mappedList<mappedType>::setSize(const label newSize)
+{
+    // set size of the list
+    // more details should be in class List
+    Foam::List<mappedType>::setSize(newSize);
+    // update size of map_
+    // more details should be in class Map 
+    map_.resize(newSize);
+}
+```
+
+Set size of `mappedList`.
+
+#### resize
+
+```cpp
+template <class mappedType>
+void Foam::mappedList<mappedType>::resize(const label newSize)
+{
+    // use setSize to set new size
+    (*this).setSize(newSize);
+}
+```
+
+#### found 1
+
+```cpp
+
+```
+
+#### found 2
+
+```cpp
+
+```
