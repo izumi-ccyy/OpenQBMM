@@ -15,6 +15,14 @@
    3. [mappedLists.H](#mappedlistsh)
    4. [mappedList.C](#mappedlistc)
       1. [Static Member Functions](#static-member-functions)
+      2. [Constructors](#constructors)
+         1. [Constructor 1](#constructor-1)
+         2. [Constructor 2](#constructor-2)
+         3. [Constructor 3](#constructor-3)
+         4. [Constructor 4](#constructor-4)
+      3. [Destructor](#destructor)
+      4. [Member functions](#member-functions)
+         1. [calcMapIndex](#calcmapindex)
 
 ## mappedList.H
 
@@ -307,3 +315,77 @@ Foam::mappedList<mappedType>::listToLabel
     return l;
 }
 ```
+
+### Constructors
+
+#### Constructor 1
+
+```cpp
+
+```
+
+#### Constructor 2
+
+```cpp
+
+```
+
+#### Constructor 3
+
+```cpp
+
+```
+
+#### Constructor 4
+
+```cpp
+
+```
+
+### Destructor
+
+```cpp
+template <class mappedType>
+Foam::mappedList<mappedType>::~mappedList()
+{}
+```
+
+### Member functions
+
+#### calcMapIndex
+
+```cpp
+template <class mappedType>
+Foam::label Foam::mappedList<mappedType>::calcMapIndex
+(
+    std::initializer_list<Foam::label> indexes
+) const
+{
+    // declare and initialize mapIndex
+    label mapIndex = 0;
+    // if indexes is not empty
+    if (indexes.size() > 0)
+    {
+        for
+        (
+            // for every index in indexes
+            std::initializer_list<label>::iterator iter = indexes.begin();
+            iter < indexes.end();
+            iter++
+        )
+        {
+            // std::distance, to obtain the number of elements between indexes.begin() and iter.
+            label argIndex = std::distance(indexes.begin(), iter);
+            // mapIndex = mapIndex + (*iter) * 10^(nDims - argINdex -1)
+            // It convert a list of number into a single number 
+            // For example, convert a list of [4, 5, 1, 2] to 4512
+            // where, nDims = 4
+            mapIndex += (*iter)*pow(scalar(10), nDims_ - argIndex - 1);
+        }
+    }
+
+    return mapIndex;
+}
+```
+
+This function convert a list of numbers into a single number as in the description, the lookup '2 1 0' is converted to the label key '210'.

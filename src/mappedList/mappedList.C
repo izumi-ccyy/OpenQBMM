@@ -189,18 +189,25 @@ Foam::label Foam::mappedList<mappedType>::calcMapIndex
     std::initializer_list<Foam::label> indexes
 ) const
 {
+    // declare and initialize mapIndex
     label mapIndex = 0;
-
+    // if indexes is not empty
     if (indexes.size() > 0)
     {
         for
         (
+            // for every index in indexes
             std::initializer_list<label>::iterator iter = indexes.begin();
             iter < indexes.end();
             iter++
         )
         {
+            // std::distance, to obtain the number of elements between indexes.begin() and iter.
             label argIndex = std::distance(indexes.begin(), iter);
+            // mapIndex = mapIndex + (*iter) * 10^(nDims - argINdex -1)
+            // It convert a list of number into a single number 
+            // For example, convert a list of [4, 5, 1, 2] to 4512
+            // where, nDims = 4
             mapIndex += (*iter)*pow(scalar(10), nDims_ - argIndex - 1);
         }
     }
