@@ -322,6 +322,13 @@ Foam::mappedList<mappedType>::listToLabel
 
 ### Constructors
 
+There are four unknown variables to be initialized in class malledList：
+
+* size of the List
+* initValue of the List
+* map_
+* nDims_
+
 #### Constructor 1
 
 ```cpp
@@ -398,14 +405,71 @@ The only difference between constructor 1 and constructor 2 is that the latter u
 #### Constructor 3
 
 ```cpp
-
+template <class mappedType> Foam::mappedList<mappedType>::mappedList
+(
+    // construct from size, map and initValue
+    const label size,
+    const Map<label>& map,
+    const mappedType& initValue
+)
+:
+    // initialize with arguments
+    List<mappedType>(size, initValue),
+    map_(map),
+    nDims_(0)
+{
+    // for every element in map_
+    forAllConstIter(Map<label>, map_, iter)
+    {
+        // get Label Key
+        label x = iter.key();
+        label nD = 0;
+        // get the digit of the Label Key 
+        while (x)
+        {
+            x /= 10;
+            nD++;
+        }
+        // get nDims_
+        nDims_ = max(nDims_, nD);
+    }
+}
 ```
+
+Here, size, map_ and iniValue are known, so nDims_ is initialized with them.
 
 #### Constructor 4
 
 ```cpp
-
+template <class mappedType> Foam::mappedList<mappedType>::mappedList
+(
+    // construct from a initList and indexes
+    const List<mappedType>& initList,
+    const labelListList& indexes
+)
+:
+    List<mappedType>(initList),
+    map_(initList.size()),
+    nDims_(0)
+{
+    // get nDims_
+    forAll(indexes, i)
+    {
+        nDims_ = max(nDims_, indexes[i].size());
+    }
+    // get map_
+    forAll(*this, elemi)
+    {
+        map_.insert
+        (
+            listToLabel(indexes[elemi], nDims_),
+            elemi
+        );
+    }
+}
 ```
+
+Here, an initial list and indexes are known, so nDims_ and map_ are initialized with them.
 
 ### Destructor
 
