@@ -517,6 +517,7 @@ Foam::quadratureNode<scalarType, vectorType>::d
     const volScalarField& x
 ) const
 {
+    // if sizeIndex_ = -1, return d = 0
     if (sizeIndex_ == -1)
     {
         return tmp<volScalarField>
@@ -537,17 +538,19 @@ Foam::quadratureNode<scalarType, vectorType>::d
             )
         );
     }
-
+    // if lengthBased_
     if (lengthBased_)
     {
+        // return d = x
         return x;
     }
-
+    // if massBased and rnoPtr_ is not empty
     if (massBased_ && rhoPtr_)
     {
+        // return d = (x * 6.0 / (PI * rho)) ^ (1 / 3)
         return cbrt(x*6.0/(Foam::constant::mathematical::pi*(*rhoPtr_)));
     }
-
+    // return d = (x * 6.0 / PI) ^ (1 / 3)
     return cbrt(x*6.0/Foam::constant::mathematical::pi);
 }
 
@@ -559,6 +562,7 @@ Foam::scalar Foam::quadratureNode<scalarType, vectorType>::d
     const scalar& x
 ) const
 {
+    // similar to above
     if (sizeIndex_ == -1)
     {
         return 0.0;
@@ -584,28 +588,33 @@ Foam::quadratureNode<scalarType, vectorType>::n
     const volScalarField& x
 ) const
 {
+    // if use volume fraction
     if (!useVolumeFraction_)
     {
+        // return n = w
         return w;
 
     }
-
+    // declare v
     tmp<volScalarField> v;
     if (massBased_ && rhoPtr_)
     {
+        // v = x / rho
         v = x/(*rhoPtr_);
     }
     else if (lengthBased_)
     {
+        // v = x^3
         v = pow3(x);
     }
     else
     {
+        // v = x
         v = x;
     }
 
     v.ref().max(pow3(SMALL));
-
+    // n = w / v
     return w/v;
 }
 
@@ -618,6 +627,7 @@ Foam::scalar Foam::quadratureNode<scalarType, vectorType>::n
     const scalar& x
 ) const
 {
+    // similar to above
     if (!useVolumeFraction_)
     {
         return w;

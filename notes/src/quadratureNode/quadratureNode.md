@@ -621,10 +621,204 @@ Do not implement clone.
 
 ##### d 1
 
+```cpp
+template<class scalarType, class vectorType>
+Foam::tmp<Foam::volScalarField>
+Foam::quadratureNode<scalarType, vectorType>::d
+(
+    const volScalarField& x
+) const
+{
+    // if sizeIndex_ = -1, return d = 0
+    if (sizeIndex_ == -1)
+    {
+        return tmp<volScalarField>
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "d",
+                    weight_.time().timeName(),
+                    weight_.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                weight_.mesh(),
+                dimensionedScalar("d", dimLength, Zero)
+            )
+        );
+    }
+    // if lengthBased_
+    if (lengthBased_)
+    {
+        // return d = x
+        return x;
+    }
+    // if massBased and rnoPtr_ is not empty
+    if (massBased_ && rhoPtr_)
+    {
+        // return d = (x * 6.0 / (PI * rho)) ^ (1 / 3)
+        return cbrt(x*6.0/(Foam::constant::mathematical::pi*(*rhoPtr_)));
+    }
+    // return d = (x * 6.0 / PI) ^ (1 / 3)
+    return cbrt(x*6.0/Foam::constant::mathematical::pi);
+}
+```
+
+For empty `sizeIndex_`:
+
+$$
+d = 0
+$$
+
+For `lengthBased_`
+
+$$
+d = x
+$$
+
+For `massBased_` and $\rho$ exists:
+
+$$
+d = \sqrt[3]{\frac{6x}{\pi \rho}}
+$$
+
+Else:
+
+$$
+d = \sqrt[3]{\frac{6x}{\pi}}
+$$
+
 ##### d 2
+
+```cpp
+template<class scalarType, class vectorType>
+Foam::scalar Foam::quadratureNode<scalarType, vectorType>::d
+(
+    const label celli,
+    const scalar& x
+) const
+{
+    // similar to above
+    if (sizeIndex_ == -1)
+    {
+        return 0.0;
+    }
+    if (lengthBased_)
+    {
+        return x;
+    }
+
+    if (massBased_ && rhoPtr_)
+    {
+        return cbrt(x*6.0/(Foam::constant::mathematical::pi*(*rhoPtr_)[celli]));
+    }
+    return cbrt(x*6.0/Foam::constant::mathematical::pi);
+}
+```
 
 ##### n 1
 
+```cpp
+template<class scalarType, class vectorType>
+Foam::tmp<Foam::volScalarField>
+Foam::quadratureNode<scalarType, vectorType>::n
+(
+    const volScalarField& w,
+    const volScalarField& x
+) const
+{
+    // if use volume fraction
+    if (!useVolumeFraction_)
+    {
+        // return n = w
+        return w;
+
+    }
+    // declare v
+    tmp<volScalarField> v;
+    if (massBased_ && rhoPtr_)
+    {
+        // v = x / rho
+        v = x/(*rhoPtr_);
+    }
+    else if (lengthBased_)
+    {
+        // v = x^3
+        v = pow3(x);
+    }
+    else
+    {
+        // v = x
+        v = x;
+    }
+
+    v.ref().max(pow3(SMALL));
+    // n = w / v
+    return w/v;
+}
+```
+
+For volume fraction:
+
+$$
+n = w
+$$
+
+For `maseBased_` and $\rho$ exists:
+
+$$
+n = \frac{\rho w}{x}
+$$
+
+For `lengthBased_`:
+
+$$
+n = \frac{w}{x^3}
+$$
+
+Else:
+
+$$
+n = \frac{w}{x}
+$$
+
 ##### n 2
+
+```cpp
+template<class scalarType, class vectorType>
+Foam::scalar Foam::quadratureNode<scalarType, vectorType>::n
+(
+    const label celli,
+    const scalar& w,
+    const scalar& x
+) const
+{
+    // similar to above
+    if (!useVolumeFraction_)
+    {
+        return w;
+    }
+
+    scalar v = pow3(SMALL);
+
+    if (massBased_ && rhoPtr_)
+    {
+        v = max(v, x/(*rhoPtr_)[celli]);
+    }
+    else if (lengthBased_)
+    {
+        v = max(v, pow3(x));
+    }
+    else
+    {
+        v = max(v, x);
+    }
+
+    return w/v;
+}
+```
 
 ## velocityQuadratureNode
