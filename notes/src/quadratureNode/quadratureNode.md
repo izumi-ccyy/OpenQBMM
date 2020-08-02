@@ -21,6 +21,16 @@
       2. [quadratureNodeI.H](#quadraturenodeih)
       3. [quadratureNodes.H](#quadraturenodesh)
       4. [quadratureNode.C](#quadraturenodec)
+         1. [Constructors](#constructors-1)
+            1. [Constructor 1](#constructor-1)
+            2. [Constructor 2](#constructor-2)
+         2. [Destructor](#destructor-1)
+         3. [Member functions](#member-functions-1)
+            1. [Clone](#clone-1)
+            2. [d 1](#d-1)
+            3. [d 2](#d-2)
+            4. [n 1](#n-1)
+            5. [n 2](#n-2)
    2. [velocityQuadratureNode](#velocityquadraturenode)
 
 ## quadratureNode
@@ -582,5 +592,39 @@ Rename types:
 * surfaceVelocityNode
 
 ### quadratureNode.C
+
+Define 2 constructors, 1 destructor, 1 clone, and 4 member function returning related parameters.
+
+#### Constructors
+
+##### Constructor 1
+
+##### Constructor 2
+
+#### Destructor
+
+#### Member functions
+
+##### Clone
+
+```cpp
+template<class scalarType, class vectorType>
+Foam::autoPtr<Foam::quadratureNode<scalarType, vectorType>>
+Foam::quadratureNode<scalarType, vectorType>::clone() const
+{
+    notImplemented("quadratureNode::clone() const");
+    return nullptr;
+}
+```
+
+Do not implement clone.
+
+##### d 1
+
+##### d 2
+
+##### n 1
+
+##### n 2
 
 ## velocityQuadratureNode
