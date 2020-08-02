@@ -27,9 +27,9 @@
          2. [Return functions](#return-functions-1)
             1. [set 1](#set-1)
             2. [set 2](#set-2)
-         3. [found 1](#found-1)
-         4. [found 2](#found-2)
-         5. [Edit functions](#edit-functions-1)
+            3. [found 1](#found-1)
+            4. [found 2](#found-2)
+         3. [Edit functions](#edit-functions-1)
             1. [setMap](#setmap)
             2. [set 1](#set-1-1)
             3. [set 2](#set-2-1)
@@ -404,7 +404,7 @@ bool Foam::mappedPtrList<mappedType>::set(const labelList& l) const
 }
 ```
 
-#### found 1
+##### found 1
 
 ```cpp
 // if a label key used in mappedPtrList, same with that in mappedList
@@ -427,7 +427,7 @@ bool Foam::mappedPtrList<mappedType>::found(const labelList& l) const
 }
 ```
 
-#### found 2
+##### found 2
 
 ```cpp
 // same with that in mappedList
