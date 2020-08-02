@@ -314,29 +314,125 @@ These two functions are same with those in `class mappedList`.
 
 ### Constructors
 
+There are three variables:
+
+* `PtrList`
+* `map_`
+* `nDims_`
+
 #### Constructor 1
 
 ```cpp
-
+template <class mappedType> Foam::mappedPtrList<mappedType>::mappedPtrList
+(
+    const label size,
+    const labelListList& indexes
+)
+:
+    // construct from size and indexes
+    PtrList<mappedType>(size),
+    map_(size),
+    nDims_(0)
+{
+    // get nDims_
+    forAll(indexes, i)
+    {
+        nDims_ = max(nDims_, indexes[i].size());
+    }
+    // get map_
+    forAll(*this, elemi)
+    {
+        map_.insert
+        (
+            listToLabel(indexes[elemi], nDims_),
+            elemi
+        );
+    }
+}
 ```
+
+Construct from size and indexes, `nDims_` and `map_` are initialized with them.
 
 #### Constructor 2
 
 ```cpp
-
+template <class mappedType> Foam::mappedPtrList<mappedType>::mappedPtrList
+(
+    const label size,
+    const Map<label>& map
+)
+:
+    // construct from size and map
+    PtrList<mappedType>(size),
+    map_(map),
+    nDims_(0)
+{
+    // get nDims_
+    forAllConstIter(Map<label>, map_, iter)
+    {
+        label x = iter.key();
+        label nD = 0;
+        while (x)
+        {
+            x /= 10;
+            nD++;
+        }
+        nDims_ = max(nDims_, nD);
+    }
+}
 ```
+
+Construct from size and map, nDims_ is initialized from them.
 
 #### Constructor 3
 
 ```cpp
-
+template <class mappedType> Foam::mappedPtrList<mappedType>::mappedPtrList
+(
+    const PtrList<mappedType>& initList,
+    const labelListList& indexes
+)
+:
+    // construct from initList and indexes
+    PtrList<mappedType>(initList),
+    map_(initList.size()),
+    nDims_(0)
+{
+    // get nDims_
+    forAll(indexes, i)
+    {
+        nDims_ = max(nDims_, indexes[i].size());
+    }
+    // get map_
+    forAll(*this, elemi)
+    {
+        map_.insert
+        (
+            listToLabel(indexes[elemi], nDims_),
+            elemi
+        );
+    }
+}
 ```
+
+Construct from initList and indexes, `mDims_` and `map_` are initialized from them.
 
 #### Constructor 4
 
 ```cpp
-
+template <class mappedType>
+template<class INew>
+Foam::mappedPtrList<mappedType>::mappedPtrList(Istream& is, const INew& iNewt)
+:
+    // construct from input
+    PtrList<mappedType>(is, iNewt),
+    nDims_(0)
+{
+    map_.resize(this->size());
+}
 ```
+
+Construct from input. 
 
 ### Destructor
 

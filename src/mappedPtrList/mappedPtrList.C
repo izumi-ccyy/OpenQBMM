@@ -76,15 +76,17 @@ template <class mappedType> Foam::mappedPtrList<mappedType>::mappedPtrList
     const labelListList& indexes
 )
 :
+    // construct from size and indexes
     PtrList<mappedType>(size),
     map_(size),
     nDims_(0)
 {
+    // get nDims_
     forAll(indexes, i)
     {
         nDims_ = max(nDims_, indexes[i].size());
     }
-
+    // get map_
     forAll(*this, elemi)
     {
         map_.insert
@@ -102,10 +104,12 @@ template <class mappedType> Foam::mappedPtrList<mappedType>::mappedPtrList
     const Map<label>& map
 )
 :
+    // construct from size and map
     PtrList<mappedType>(size),
     map_(map),
     nDims_(0)
 {
+    // get nDims_
     forAllConstIter(Map<label>, map_, iter)
     {
         label x = iter.key();
@@ -126,15 +130,17 @@ template <class mappedType> Foam::mappedPtrList<mappedType>::mappedPtrList
     const labelListList& indexes
 )
 :
+    // construct from initList and indexes
     PtrList<mappedType>(initList),
     map_(initList.size()),
     nDims_(0)
 {
+    // get nDims_
     forAll(indexes, i)
     {
         nDims_ = max(nDims_, indexes[i].size());
     }
-
+    // get map_
     forAll(*this, elemi)
     {
         map_.insert
@@ -149,6 +155,7 @@ template <class mappedType>
 template<class INew>
 Foam::mappedPtrList<mappedType>::mappedPtrList(Istream& is, const INew& iNewt)
 :
+    // construct from input
     PtrList<mappedType>(is, iNewt),
     nDims_(0)
 {
