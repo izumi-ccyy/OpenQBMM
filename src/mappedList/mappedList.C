@@ -73,21 +73,26 @@ Foam::mappedList<mappedType>::listToLabel
 
 template <class mappedType> Foam::mappedList<mappedType>::mappedList
 (
+    // construct from size and indexes
     const label size,
     const labelListList& indexes
 )
 :
+    // initialize List, map_ and nDims
     List<mappedType>(size),
     map_(size),
     nDims_(0)
 {
+    // for every index in indexes
     forAll(indexes, i)
     {
+        // get nDims_
         nDims_ = max(nDims_, indexes[i].size());
     }
-
+    // for every element in this mapList
     forAll(*this, elemi)
     {
+        // insert Label Key to map_
         map_.insert
         (
             listToLabel(indexes[elemi], nDims_),
@@ -98,20 +103,23 @@ template <class mappedType> Foam::mappedList<mappedType>::mappedList
 
 template <class mappedType> Foam::mappedList<mappedType>::mappedList
 (
+    // construct from size, indexes and initValue
     const label size,
     const labelListList& indexes,
     const mappedType& initValue
 )
 :
+    // initialize List with size and initValue
     List<mappedType>(size, initValue),
     map_(size),
     nDims_(0)
 {
+    // get nDims_
     forAll(indexes, i)
     {
         nDims_ = max(nDims_, indexes[i].size());
     }
-
+    // insert Label Key to map_
     forAll(*this, elemi)
     {
         map_.insert
@@ -236,6 +244,7 @@ void Foam::mappedList<mappedType>::resize(const label newSize)
 template <class mappedType>
 bool Foam::mappedList<mappedType>::found(const labelList& l) const
 {
+    // if l is larger than nDims_
     if (l.size() > nDims_)
     {
         return false;
@@ -244,7 +253,7 @@ bool Foam::mappedList<mappedType>::found(const labelList& l) const
     forAllConstIter(Map<label>, map_, iter)
     {
         label x = iter.key();
-
+        // if there is an elements in l having the same key in mappedList
         if (x == listToLabel(l, nDims_))
         {
             return true;
@@ -258,6 +267,7 @@ template <class mappedType>
 template <typename ...ArgsT>
 bool Foam::mappedList<mappedType>::found(ArgsT...args) const
 {
+    // similar, l changes to Argst ...args
     if (label(std::initializer_list<Foam::label>({args...}).size()) > nDims_)
     {
         return false;

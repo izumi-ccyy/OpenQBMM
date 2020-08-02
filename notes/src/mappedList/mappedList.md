@@ -325,14 +325,75 @@ Foam::mappedList<mappedType>::listToLabel
 #### Constructor 1
 
 ```cpp
-
+template <class mappedType> Foam::mappedList<mappedType>::mappedList
+(
+    // construct from size and indexes
+    const label size,
+    const labelListList& indexes
+)
+:
+    // initialize List, map_ and nDims
+    List<mappedType>(size),
+    map_(size),
+    nDims_(0)
+{
+    // for every index in indexes
+    forAll(indexes, i)
+    {
+        // get nDims_
+        nDims_ = max(nDims_, indexes[i].size());
+    }
+    // for every element in this mapList
+    forAll(*this, elemi)
+    {
+        // insert Label Key to map_
+        map_.insert
+        (
+            listToLabel(indexes[elemi], nDims_),
+            elemi
+        );
+    }
+}
 ```
+
+Construct from size and indexes.
+
+As in description, the part of Lookup is `List`; the part of Label Key is `map_`, `nDims_` is the number of elements in a index.
 
 #### Constructor 2
 
 ```cpp
-
+template <class mappedType> Foam::mappedList<mappedType>::mappedList
+(
+    // construct from size, indexes and initValue
+    const label size,
+    const labelListList& indexes,
+    const mappedType& initValue
+)
+:
+    // initialize List with size and initValue
+    List<mappedType>(size, initValue),
+    map_(size),
+    nDims_(0)
+{
+    // get nDims_
+    forAll(indexes, i)
+    {
+        nDims_ = max(nDims_, indexes[i].size());
+    }
+    // insert Label Key to map_
+    forAll(*this, elemi)
+    {
+        map_.insert
+        (
+            listToLabel(indexes[elemi], nDims_),
+            elemi
+        );
+    }
+}
 ```
+
+The only difference between constructor 1 and constructor 2 is that the latter uses an initValue to initialize the List.
 
 #### Constructor 3
 
@@ -381,7 +442,7 @@ Foam::label Foam::mappedList<mappedType>::calcMapIndex
             // std::distance, to obtain the number of elements between indexes.begin() and iter.
             label argIndex = std::distance(indexes.begin(), iter);
             // mapIndex = mapIndex + (*iter) * 10^(nDims - argINdex -1)
-            // It convert a list of number into a single number 
+            // It convert a list of number into a single number
             // For example, convert a list of [4, 5, 1, 2] to 4512
             // where, nDims = 4
             mapIndex += (*iter)*pow(scalar(10), nDims_ - argIndex - 1);
@@ -425,11 +486,58 @@ void Foam::mappedList<mappedType>::resize(const label newSize)
 #### found 1
 
 ```cpp
+template <class mappedType>
+bool Foam::mappedList<mappedType>::found(const labelList& l) const
+{
+    // if l is larger than nDims_
+    if (l.size() > nDims_)
+    {
+        return false;
+    }
 
+    forAllConstIter(Map<label>, map_, iter)
+    {
+        label x = iter.key();
+        // if there is an elements in l having the same key in mappedList
+        if (x == listToLabel(l, nDims_))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 ```
+
+This function is to dtermine whether there is a element in l having the same key in `mappedList`
 
 #### found 2
 
 ```cpp
+template <class mappedType>
+template <typename ...ArgsT>
+bool Foam::mappedList<mappedType>::found(ArgsT...args) const
+{
+    // similar, l changes to Argst ...args
+    if (label(std::initializer_list<Foam::label>({args...}).size()) > nDims_)
+    {
+        return false;
+    }
 
+    forAllConstIter(Map<label>, map_, iter)
+    {
+        label x = iter.key();
+
+        if (x == calcMapIndex({args...}))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 ```
+
+Similar to `found` `.
+
+It is worthy to note that there two found functions compare the 'Label Key' that is a single number.
