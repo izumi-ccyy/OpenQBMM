@@ -15,6 +15,9 @@
             3. [iNew](#inew)
             4. [Destructor](#destructor)
             5. [Member functions](#member-functions)
+               1. [Return protected data](#return-protected-data)
+               2. [Return related parameters](#return-related-parameters)
+         6. [Final Include](#final-include)
       2. [quadratureNodeI.H](#quadraturenodeih)
       3. [quadratureNodes.H](#quadraturenodesh)
       4. [quadratureNode.C](#quadraturenodec)
@@ -260,8 +263,104 @@ Declare a destructor.
 
 Declare 24 member functions.
 
+###### Return protected data
 
+```cpp
+//- Return the name of the node, name_
+const word& name() const;
 
+//- Return abscissa indexes, scalarIndexes_
+const labelList& scalarIndexes() const;
+
+//- Return velocity indexes, velocityIndexes_
+const labelList& velocityIndexes() const;
+
+//- Return size index, sizeIndex_
+label sizeIndex() const;
+
+//- Is the node length based, lengthBased_
+bool lengthBased() const;
+
+//- Is the weight in terms of volume fraction, useVolumeFraction_
+bool useVolumeFraction() const;
+
+//- Is the node extended, extended_
+bool extended() const;
+
+//- Returns the number of secondary nodes, nSecondaryNodes_
+label nSecondaryNodes() const;
+
+//- Const access to the weight of the node, weight_
+const weightType& primaryWeight() const;
+
+//- Non-const access to the weight of the node, weight_
+weightType& primaryWeight();
+
+//- Const access to the scalar abscissa of the node, abscissae_
+const abscissaeType& primaryAbscissae() const;
+
+//- Non-const access to the scalar abscissa of the node, abscissae_
+abscissaeType& primaryAbscissae();
+
+//- Const access to the secondary weights of the node, secondaryWeights_
+const secondaryWeightsType& secondaryWeights() const;
+
+//- Non-const access to the secondary weights of the node, secondaryWeights_
+secondaryWeightsType& secondaryWeights();
+
+//- Const access to the list of secondary abscissae of the node, secondaryAbscissae_
+const secondaryAbscissaeType& secondaryAbscissae() const;
+
+//- Non-const access to the list of secondary abscissae of the node, secondaryAbscissae_
+secondaryAbscissaeType& secondaryAbscissae();
+
+//- Const access to sigma, sigmas_
+const sigmasType& sigmas() const;
+
+//- Non-const access to sigma, sigmas_
+sigmasType& sigmas();
+
+//- Const access to the velocity abscissa of the node
+virtual const velocityAbscissaeType& velocityAbscissae() const;
+
+//- Non-const access to the velcity abscissa of the node
+virtual velocityAbscissaeType& velocityAbscissae();
+```
+
+Declare 20 functions to return protected data.
+
+For 5 protected data, two functions are provided for const and non-const access. Functions for `massBased_` and `rhoPtr_` are not declared. Additionally, there are two functions declared returning undefined `velocityAbscissae_`.
+
+###### Return related parameters
+
+```cpp
+//- Return the diameter given an abscissae
+tmp<volScalarField> d(const volScalarField& x) const;
+
+//- Return the diameter given an abscissae and celli
+scalar d(const label celli, const scalar& x) const;
+
+//- Return the number density given an abscissae
+tmp<volScalarField> n
+(
+    const volScalarField& w,
+    const volScalarField& x
+) const;
+
+//- Return the number density given an abscissae and celli
+scalar n(const label celli, const scalar& w, const scalar& x) const;
+```
+
+Declare 4 functions to return related parameters.
+
+#### Final Include
+
+```cpp
+#ifdef NoRepository
+#   include "quadratureNodeI.H"
+#   include "quadratureNode.C"
+#endif
+```
 
 ### quadratureNodeI.H
 

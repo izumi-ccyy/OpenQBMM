@@ -228,58 +228,58 @@ public:
 
         // Access
 
-            //- Return the name of the node
+            //- Return the name of the node, name_
             const word& name() const;
 
-            //- Return abscissa indexes
+            //- Return abscissa indexes, scalarIndexes_
             const labelList& scalarIndexes() const;
 
-            //- Return velocity indexes
+            //- Return velocity indexes, velocityIndexes_
             const labelList& velocityIndexes() const;
 
-            //- Return size index
+            //- Return size index, sizeIndex_
             label sizeIndex() const;
 
-            //- Is the node length based
+            //- Is the node length based, lengthBased_
             bool lengthBased() const;
 
-            //- Is the weight in terms of volume fraction
+            //- Is the weight in terms of volume fraction, useVolumeFraction_
             bool useVolumeFraction() const;
 
-            //- Is the node extended
+            //- Is the node extended, extended_
             bool extended() const;
 
-            //- Returns the number of secondary nodes
+            //- Returns the number of secondary nodes, nSecondaryNodes_
             label nSecondaryNodes() const;
 
-            //- Const access to the weight of the node
+            //- Const access to the weight of the node, weight_
             const weightType& primaryWeight() const;
 
-            //- Non-const access to the weight of the node
+            //- Non-const access to the weight of the node, weight_
             weightType& primaryWeight();
 
-            //- Const access to the scalar abscissa of the node
+            //- Const access to the scalar abscissa of the node, abscissae_
             const abscissaeType& primaryAbscissae() const;
 
-            //- Non-const access to the scalar abscissa of the node
+            //- Non-const access to the scalar abscissa of the node, abscissae_
             abscissaeType& primaryAbscissae();
 
-            //- Const access to the secondary weights of the node
+            //- Const access to the secondary weights of the node, secondaryWeights_
             const secondaryWeightsType& secondaryWeights() const;
 
-            //- Non-const access to the secondary weights of the node
+            //- Non-const access to the secondary weights of the node, secondaryWeights_
             secondaryWeightsType& secondaryWeights();
 
-            //- Const access to the list of secondary abscissae of the node
+            //- Const access to the list of secondary abscissae of the node, secondaryAbscissae_
             const secondaryAbscissaeType& secondaryAbscissae() const;
 
-            //- Non-const access to the list of secondary abscissae of the node
+            //- Non-const access to the list of secondary abscissae of the node, secondaryAbscissae_
             secondaryAbscissaeType& secondaryAbscissae();
 
-            //- Const access to sigma
+            //- Const access to sigma, sigmas_
             const sigmasType& sigmas() const;
 
-            //- Non-const access to sigma
+            //- Non-const access to sigma, sigmas_
             sigmasType& sigmas();
 
             //- Const access to the velocity abscissa of the node
