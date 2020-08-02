@@ -560,7 +560,7 @@ Foam::quadratureNode<scalarType, vectorType>::velocityAbscissae()
 }
 ```
 
-Definition of 20 returning functions.
+Definition of 20 functions returning protected data.
 
 ### quadratureNodes.H
 
