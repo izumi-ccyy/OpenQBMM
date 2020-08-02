@@ -96,7 +96,7 @@ protected:
 
         //- Index of size component
         label sizeIndex_;
-
+        // determine internal coordinate
         //- Is the size length based
         bool lengthBased_;
 
@@ -173,7 +173,7 @@ public:
             const label nSecondaryNodes_;
 
         public:
-
+            // constructor for iNew
             iNew
             (
                 const word& distributionName,
@@ -193,7 +193,7 @@ public:
                 extended_(extended),
                 nSecondaryNodes_(nSecondaryNodes)
             {}
-
+            // return a pointer to a new quadratureNode from an input
             autoPtr<quadratureNode<scalarType, vectorType>>
             operator()
             (
