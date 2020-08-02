@@ -164,7 +164,7 @@ Foam::mappedPtrList<mappedType>::~mappedPtrList()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
+// same with that in mappedList
 template <class mappedType>
 Foam::label Foam::mappedPtrList<mappedType>::calcMapIndex
 (
@@ -194,7 +194,9 @@ Foam::label Foam::mappedPtrList<mappedType>::calcMapIndex
 template <class mappedType>
 void Foam::mappedPtrList<mappedType>::setMap(const Map<label>& map)
 {
+    // set map_ as map
     map_ = map;
+    // get nDims_
     forAllConstIter(Map<label>, map_, iter)
     {
         label x = iter.key();
@@ -212,6 +214,7 @@ void Foam::mappedPtrList<mappedType>::setMap(const Map<label>& map)
 template <class mappedType>
 bool Foam::mappedPtrList<mappedType>::set(const label i) const
 {
+    // use set(i) of PtrList, is set(i) a nullptr or is element i set
     return PtrList<mappedType>::set(i);
 }
 
@@ -219,9 +222,10 @@ bool Foam::mappedPtrList<mappedType>::set(const label i) const
 template <class mappedType>
 bool Foam::mappedPtrList<mappedType>::set(const labelList& l) const
 {
+    // use set(map_) of PtrList, is set(map_) a list of nullptr or is map_ set
     return PtrList<mappedType>::set(map_[listToLabel(l, nDims_)]);
 }
-
+// if a label key used in mappedPtrList, same with that in mappedList
 template <class mappedType>
 bool Foam::mappedPtrList<mappedType>::found(const labelList& l) const
 {
@@ -239,7 +243,7 @@ bool Foam::mappedPtrList<mappedType>::found(const labelList& l) const
     }
     return false;
 }
-
+// same with that in mappedList
 template <class mappedType>
 template <typename ...ArgsT>
 bool Foam::mappedPtrList<mappedType>::found(ArgsT...args) const
@@ -266,6 +270,7 @@ void Foam::mappedPtrList<mappedType>::set
     mappedType* entry
 )
 {
+    // use set(i, entry) of PtrList to set list
     PtrList<mappedType>::set(i, entry);
 }
 
@@ -277,6 +282,7 @@ void Foam::mappedPtrList<mappedType>::set
     mappedType* entry
 )
 {
+    // convert list to label key, then set list
     PtrList<mappedType>::set(map_[listToLabel(l, nDims_)], entry);
 }
 
