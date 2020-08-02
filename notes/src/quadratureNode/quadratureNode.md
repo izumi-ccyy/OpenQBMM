@@ -603,6 +603,12 @@ Define 2 constructors, 1 destructor, 1 clone, and 4 member function returning re
 
 #### Destructor
 
+```cpp
+template<class scalarType, class vectorType>
+Foam::quadratureNode<scalarType, vectorType>::~quadratureNode()
+{}
+```
+
 #### Member functions
 
 ##### Clone
