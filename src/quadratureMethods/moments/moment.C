@@ -280,11 +280,14 @@ void Foam::moment<fieldType, nodeType>::updateBoundaries()
     // If nodes are not of extended type, only use primary quadrature.
     if (!nodes[0].extended())
     {
+        // for every patch at boundary
         forAll(this->boundaryField(), patchi)
-        {
+        {   // set boundaryFieldRef to zero
             this->boundaryFieldRef()[patchi] = Zero;
+            // for all nodes
             forAll(nodes, pNodei)
             {
+                // get node and primary weight m
                 const nodeType& node = nodes[pNodei];
                 scalarField m(node.primaryWeight().boundaryField()[patchi]);
 
