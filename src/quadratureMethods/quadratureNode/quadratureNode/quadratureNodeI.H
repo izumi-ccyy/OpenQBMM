@@ -207,7 +207,7 @@ Foam::quadratureNode<scalarType, vectorType>::velocityAbscissae() const
         << "Attempt to access velocity abscissa of a quadrature node" << nl
         << "    with no scalar abscissa. "
         << abort(FatalError);
-
+    // return a null pointer 
     return const_cast<const vectorType&>(velocityAbscissaeType::null());
 }
 
@@ -219,6 +219,7 @@ Foam::quadratureNode<scalarType, vectorType>::velocityAbscissae()
         << "Attempt to access velocity abscissa of aquadrature node" << nl
         << "    with no velocity abscissa. "
         << abort(FatalError);
+    // return a null pointer    
     return const_cast<vectorType&>(velocityAbscissaeType::null());
 }
 

@@ -364,7 +364,222 @@ Declare 4 functions to return related parameters.
 
 ### quadratureNodeI.H
 
+```cpp
+template<class scalarType, class vectorType>
+const Foam::word&
+Foam::quadratureNode<scalarType, vectorType>::name() const
+{
+    return name_;
+}
+
+template<class scalarType, class vectorType>
+bool Foam::quadratureNode<scalarType, vectorType>::extended() const
+{
+    return extended_;
+}
+
+template<class scalarType, class vectorType>
+const Foam::labelList&
+Foam::quadratureNode<scalarType, vectorType>::scalarIndexes() const
+{
+    return scalarIndexes_;
+}
+
+template<class scalarType, class vectorType>
+const Foam::labelList&
+Foam::quadratureNode<scalarType, vectorType>::velocityIndexes() const
+{
+    return velocityIndexes_;
+}
+
+template<class scalarType, class vectorType>
+Foam::label
+Foam::quadratureNode<scalarType, vectorType>::sizeIndex() const
+{
+    return sizeIndex_;
+}
+
+template<class scalarType, class vectorType>
+bool Foam::quadratureNode<scalarType, vectorType>::lengthBased() const
+{
+    return lengthBased_;
+}
+
+template<class scalarType, class vectorType>
+bool Foam::quadratureNode<scalarType, vectorType>::useVolumeFraction() const
+{
+    return useVolumeFraction_;
+}
+
+template<class scalarType, class vectorType>
+Foam::label
+Foam::quadratureNode<scalarType, vectorType>::nSecondaryNodes() const
+{
+    return nSecondaryNodes_;
+}
+
+template<class scalarType, class vectorType>
+const scalarType&
+Foam::quadratureNode<scalarType, vectorType>::primaryWeight() const
+{
+    return weight_;
+}
+
+template<class scalarType, class vectorType>
+scalarType&
+Foam::quadratureNode<scalarType, vectorType>::primaryWeight()
+{
+    return weight_;
+}
+
+template<class scalarType, class vectorType>
+const Foam::PtrList<scalarType>&
+Foam::quadratureNode<scalarType, vectorType>::primaryAbscissae() const
+{
+    return abscissae_;
+}
+
+template<class scalarType, class vectorType>
+Foam::PtrList<scalarType>&
+Foam::quadratureNode<scalarType, vectorType>::primaryAbscissae()
+{
+    return abscissae_;
+}
+
+template<class scalarType, class vectorType>
+const Foam::PtrList<Foam::PtrList<scalarType>>&
+Foam::quadratureNode<scalarType, vectorType>::secondaryWeights() const
+{
+    if (!extended_)
+    {
+        FatalErrorInFunction
+            << "Attempt to access secondary weights of a quadrature node" << nl
+            << "    not of extended type. "
+            << abort(FatalError);
+    }
+
+    return secondaryWeights_;
+}
+
+template<class scalarType, class vectorType>
+Foam::PtrList<Foam::PtrList<scalarType>>&
+Foam::quadratureNode<scalarType, vectorType>::secondaryWeights()
+{
+    if (!extended_)
+    {
+        FatalErrorInFunction
+            << "Attempt to access secondary weights of a quadrature node" << nl
+            << "    not of extended type. "
+            << abort(FatalError);
+    }
+    return secondaryWeights_;
+}
+
+template<class scalarType, class vectorType>
+const Foam::PtrList<Foam::PtrList<scalarType>>&
+Foam::quadratureNode<scalarType, vectorType>::secondaryAbscissae() const
+{
+    if (!extended_)
+    {
+        FatalErrorInFunction
+            << "Attempt to access secondary abscissae of a quadrature" << nl
+            << "   node not of extended type. "
+            << abort(FatalError);
+    }
+
+    return secondaryAbscissae_;
+}
+
+template<class scalarType, class vectorType>
+Foam::PtrList<Foam::PtrList<scalarType>>&
+Foam::quadratureNode<scalarType, vectorType>::secondaryAbscissae()
+{
+    if (!extended_)
+    {
+        FatalErrorInFunction
+            << "Attempt to access secondary abscissae of a quadrature" << nl
+            << "   node not of extended type. "
+            << abort(FatalError);
+    }
+
+    return secondaryAbscissae_;
+}
+
+template<class scalarType, class vectorType>
+const Foam::PtrList<scalarType>&
+Foam::quadratureNode<scalarType, vectorType>::sigmas() const
+{
+    if (!extended_)
+    {
+        FatalErrorInFunction
+            << "Attempt to access sigma field of a quadrature node not" << nl
+            << "   of extended type. "
+            << abort(FatalError);
+    }
+
+    return sigmas_;
+}
+
+template<class scalarType, class vectorType>
+Foam::PtrList<scalarType>&
+Foam::quadratureNode<scalarType, vectorType>::sigmas()
+{
+    if (!extended_)
+    {
+        FatalErrorInFunction
+            << "Attempt to access sigma field of a quadrature node not" << nl
+            << "   of extended type. "
+            << abort(FatalError);
+    }
+
+    return sigmas_;
+}
+
+template<class scalarType, class vectorType>
+const vectorType&
+Foam::quadratureNode<scalarType, vectorType>::velocityAbscissae() const
+{
+    FatalErrorInFunction
+        << "Attempt to access velocity abscissa of a quadrature node" << nl
+        << "    with no scalar abscissa. "
+        << abort(FatalError);
+    // return a null pointer 
+    return const_cast<const vectorType&>(velocityAbscissaeType::null());
+}
+
+template<class scalarType, class vectorType>
+vectorType&
+Foam::quadratureNode<scalarType, vectorType>::velocityAbscissae()
+{
+    FatalErrorInFunction
+        << "Attempt to access velocity abscissa of aquadrature node" << nl
+        << "    with no velocity abscissa. "
+        << abort(FatalError);
+    // return a null pointer    
+    return const_cast<vectorType&>(velocityAbscissaeType::null());
+}
+```
+
+Definition of 20 returning functions.
+
 ### quadratureNodes.H
+
+```cpp
+typedef quadratureNode<volScalarField, volVectorField>  volScalarNode;
+typedef quadratureNode<surfaceScalarField, surfaceVectorField>
+    surfaceScalarNode;
+
+typedef velocityQuadratureNode<volScalarField, volVectorField> volVelocityNode;
+typedef velocityQuadratureNode<surfaceScalarField, surfaceVectorField> 
+    surfaceVelocityNode;
+```
+
+Rename types:
+
+* volScalarNode
+* surfaceScalarNode
+* volVelocityNode
+* surfaceVelocityNode
 
 ### quadratureNode.C
 
