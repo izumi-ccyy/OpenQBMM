@@ -34,8 +34,9 @@ template <class mappedType>
 template <typename ...ArgsT>
 mappedType& Foam::mappedList<mappedType>::operator()(ArgsT ...args)
 {
+    // calculate map index with the argument
     label mapIndex = calcMapIndex({args...});
-
+    // In fact, these functions convert [] to () 
     return this->operator[](map_[mapIndex]);
 }
 
@@ -55,6 +56,7 @@ const mappedType& Foam::mappedList<mappedType>::operator()
     const Foam::labelList& l
 ) const
 {
+    // first conver list to a single label and then get element
     return this->operator[](map_[listToLabel(l, nDims_)]);
 }
 
@@ -70,6 +72,7 @@ mappedType& Foam::mappedList<mappedType>::operator()
 template <class mappedType> const Foam::Map<Foam::label>&
 Foam::mappedList<mappedType>::map() const
 {
+    // return map_
     return map_;
 }
 
