@@ -41,6 +41,7 @@ Foam::mappedList<mappedType>::listToWord(const labelList& lst)
 
     forAll(lst, dimi)
     {
+        // a string-like w
         w += Foam::name(lst[dimi]);
     }
 
@@ -60,6 +61,7 @@ Foam::mappedList<mappedType>::listToLabel
 
     forAll(lst, dimi)
     {
+        // conver to a lable as a number
         l += lst[dimi]*pow(scalar(10), size - dimi - 1);
     }
 

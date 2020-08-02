@@ -270,3 +270,40 @@ Rename type of mappedList:
 Two static member functions, four constructors, a destructors, and five member functions(tow modifiers, two access and a private member function) are defined here.
 
 ### Static Member Functions
+
+```cpp
+template <class mappedType>
+Foam::word
+Foam::mappedList<mappedType>::listToWord(const labelList& lst)
+{
+    word w;
+
+    forAll(lst, dimi)
+    {
+        // a string-like w
+        w += Foam::name(lst[dimi]);
+    }
+
+    return w;
+}
+
+template <class mappedType>
+Foam::label
+Foam::mappedList<mappedType>::listToLabel
+(
+    const labelList& lst,
+    const label nDims
+)
+{
+    label l = 0;
+    label size = max(nDims, lst.size());
+
+    forAll(lst, dimi)
+    {
+        // conver to a lable as a number
+        l += lst[dimi]*pow(scalar(10), size - dimi - 1);
+    }
+
+    return l;
+}
+```
