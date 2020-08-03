@@ -599,6 +599,252 @@ Define 2 constructors, 1 destructor, 1 clone, and 4 member function returning re
 
 ##### Constructor 1
 
+```cpp
+template<class scalarType, class vectorType>
+Foam::quadratureNode<scalarType, vectorType>::quadratureNode
+(
+    const word& name,
+    const word& distributionName,
+    const fvMesh& mesh,
+    const dimensionSet& weightDimensions,
+    const PtrList<dimensionSet>& abscissaeDimensions,
+    const bool extended,
+    const label nSecondaryNodes
+)
+:
+    // initialize name_
+    name_(IOobject::groupName(name, distributionName)),
+    // create weight_ as IO object, initial value is 0
+    weight_
+    (
+        IOobject
+        (
+            IOobject::groupName("weight", name_),
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensioned<typename weightType::value_type>
+        (
+            "zeroWeight",
+            weightDimensions,
+            pTraits<typename weightType::value_type>::zero
+        )
+    ),
+    // initialize other variables
+    abscissae_(),
+    scalarIndexes_(),
+    velocityIndexes_(),
+    sizeIndex_(-1),
+    lengthBased_(false),
+    massBased_(false),
+    useVolumeFraction_(false),
+    secondaryWeights_(),
+    secondaryAbscissae_(),
+    sigmas_(),
+    nSecondaryNodes_(nSecondaryNodes),
+    extended_(extended)
+{
+    // if weight is dimensionless
+    if (weightDimensions == dimless)
+    {
+        // this is using volume fraction
+        useVolumeFraction_ = true;
+    }
+    // classify the scalar and velocity internal coordinates
+    // for every dimension of abscissae
+    forAll(abscissaeDimensions, dimi)
+    {
+        // if dimension is that of velocity 
+        if (abscissaeDimensions[dimi] == dimVelocity)
+        {
+            // add this node to velocity nodes
+            velocityIndexes_.append(dimi);
+        }
+        else
+        {
+            // else add this node to scalar nodes
+            scalarIndexes_.append(dimi);
+            // classify the internal coordinates as mass based, volume based ot length based
+            if
+            (
+                (abscissaeDimensions[dimi] == dimMass)
+             || (abscissaeDimensions[dimi] == dimVolume)
+             || (abscissaeDimensions[dimi] == dimLength)
+            )
+            {
+                // if sizeIndex != 1, there is an error
+                if (sizeIndex_ != -1)
+                {
+                    FatalErrorInFunction
+                        << "Only one abscissae can be sized based."
+                        << abort(FatalError);
+                }
+                // set sizeIndex_ = dimi
+                sizeIndex_ = dimi;
+                // determine whether this node is length based or mass based
+                if (abscissaeDimensions[dimi] == dimLength)
+                {
+                    lengthBased_ = true;
+                }
+                else if (abscissaeDimensions[dimi] == dimMass)
+                {
+                    massBased_ = true;
+                    // if mass based, rho should be created
+                    word rhoName = IOobject::groupName("thermo:rho", name_);
+
+                    if (mesh.foundObject<volScalarField>(rhoName))
+                    {
+                        rhoPtr_ = &mesh.lookupObject<volScalarField>(rhoName);
+                    }
+                }
+            }
+        }
+    }
+
+    abscissae_.resize(scalarIndexes_.size());
+    // if using extended algorithm
+    if (extended_)
+    {
+        // set secondaryWeights_, secondaryAbscissae_, sigmas_
+        secondaryWeights_.resize(scalarIndexes_.size());
+        secondaryAbscissae_.resize(scalarIndexes_.size());
+        sigmas_.resize(scalarIndexes_.size());
+    }
+    // for every abscissae_ for scalar internal coordinates 
+    forAll(abscissae_, dimi)
+    {
+        // get label kek as cmpt
+        label cmpt = scalarIndexes_[dimi];
+        // set as a labelList, with label key - dimi, and a PtrList of abscissa
+        abscissae_.set
+        (
+            dimi,
+            new abscissaType
+            (
+                IOobject
+                (
+                    IOobject::groupName("abscissa" + Foam::name(dimi), name_),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                // set dimension and initial value
+                dimensionedScalar
+                (
+                    "zeroAbscissa",
+                    abscissaeDimensions[cmpt],
+                    Zero
+                )
+            )
+        );
+        // if using enxtended node, secondary nodes for velocity are initialized
+        if (extended_)
+        {
+            // Allocating secondary quadrature only if the node is of extended 
+            // type
+            secondaryWeights_.set
+            (
+                dimi,
+                new PtrList<weightType>(nSecondaryNodes_)
+            );
+            secondaryAbscissae_.set
+            (
+                dimi,
+                new abscissaeType(nSecondaryNodes_)
+            );
+
+            // Allocating secondary weights and abscissae
+            // for every secondary weights and abscissae 
+            forAll(secondaryWeights_[dimi], sNodei)
+            {
+                // create secondaryWeights_
+                secondaryWeights_[dimi].set
+                (
+                    sNodei,
+                    new weightType
+                    (
+                        IOobject
+                        (
+                            IOobject::groupName
+                            (
+                                "secondaryWeight"
+                              + Foam::name(dimi)
+                              + '.'
+                              + Foam::name(sNodei),
+                                name_
+                            ),
+                            mesh.time().timeName(),
+                            mesh,
+                            IOobject::NO_READ,
+                            IOobject::NO_WRITE
+                        ),
+                        mesh,
+                        // dimension less
+                        dimensionedScalar("zeroWeight", dimless, Zero)
+                    )
+                );
+                // create secondaryAbscissae_
+                secondaryAbscissae_[dimi].set
+                (
+                    sNodei,
+                    new abscissaType
+                    (
+                        IOobject
+                        (
+                            IOobject::groupName
+                            (
+                                "secondaryAbscissa"
+                              + Foam::name(dimi)
+                              + '.'
+                              + Foam::name(sNodei),
+                                name_
+                            ),
+                            mesh.time().timeName(),
+                            mesh,
+                            IOobject::NO_READ,
+                            IOobject::NO_WRITE
+                        ),
+                        mesh,
+                        // set dimension
+                        dimensionedScalar
+                        (
+                            "zeroAbscissa",
+                            abscissaeDimensions[cmpt],
+                            Zero
+                        )
+                    )
+                );
+            }
+
+            // Allocating sigma
+            sigmas_.set
+            (
+                dimi,
+                new sigmaType
+                (
+                    IOobject
+                    (
+                        IOobject::groupName("sigma", name_),
+                        mesh.time().timeName(),
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    mesh,
+                    // sigma is dimension less
+                    dimensionedScalar("zeroSigma", dimless, Zero)
+                )
+            );
+        }
+    }
+}
+```
+
 ##### Constructor 2
 
 #### Destructor

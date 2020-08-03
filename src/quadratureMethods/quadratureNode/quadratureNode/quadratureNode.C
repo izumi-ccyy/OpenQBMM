@@ -43,7 +43,9 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
     const label nSecondaryNodes
 )
 :
+    // initialize name_
     name_(IOobject::groupName(name, distributionName)),
+    // create weight_ as IO object, initial value is 0
     weight_
     (
         IOobject
@@ -62,6 +64,7 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
             pTraits<typename weightType::value_type>::zero
         )
     ),
+    // initialize other variables
     abscissae_(),
     scalarIndexes_(),
     velocityIndexes_(),
@@ -75,21 +78,27 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
     nSecondaryNodes_(nSecondaryNodes),
     extended_(extended)
 {
+    // if weight is dimensionless
     if (weightDimensions == dimless)
     {
+        // this is using volume fraction
         useVolumeFraction_ = true;
     }
-
+    // classify the scalar and velocity internal coordinates
+    // for every dimension of abscissae
     forAll(abscissaeDimensions, dimi)
     {
+        // if dimension is that of velocity 
         if (abscissaeDimensions[dimi] == dimVelocity)
         {
+            // add this node to velocity nodes
             velocityIndexes_.append(dimi);
         }
         else
         {
+            // else add this node to scalar nodes
             scalarIndexes_.append(dimi);
-
+            // classify the internal coordinates as mass based, volume based ot length based
             if
             (
                 (abscissaeDimensions[dimi] == dimMass)
@@ -97,15 +106,16 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
              || (abscissaeDimensions[dimi] == dimLength)
             )
             {
+                // if sizeIndex != 1, there is an error
                 if (sizeIndex_ != -1)
                 {
                     FatalErrorInFunction
                         << "Only one abscissae can be sized based."
                         << abort(FatalError);
                 }
-
+                // set sizeIndex_ = dimi
                 sizeIndex_ = dimi;
-
+                // determine whether this node is length based or mass based
                 if (abscissaeDimensions[dimi] == dimLength)
                 {
                     lengthBased_ = true;
@@ -113,6 +123,7 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
                 else if (abscissaeDimensions[dimi] == dimMass)
                 {
                     massBased_ = true;
+                    // if mass based, rho should be created
                     word rhoName = IOobject::groupName("thermo:rho", name_);
 
                     if (mesh.foundObject<volScalarField>(rhoName))
@@ -125,17 +136,20 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
     }
 
     abscissae_.resize(scalarIndexes_.size());
-
+    // if using extended algorithm
     if (extended_)
     {
+        // set secondaryWeights_, secondaryAbscissae_, sigmas_
         secondaryWeights_.resize(scalarIndexes_.size());
         secondaryAbscissae_.resize(scalarIndexes_.size());
         sigmas_.resize(scalarIndexes_.size());
     }
-
+    // for every abscissae_ for scalar internal coordinates 
     forAll(abscissae_, dimi)
     {
+        // get label kek as cmpt
         label cmpt = scalarIndexes_[dimi];
+        // set as a labelList, with label key - dimi, and a PtrList of abscissa
         abscissae_.set
         (
             dimi,
@@ -150,6 +164,7 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
                     IOobject::NO_WRITE
                 ),
                 mesh,
+                // set dimension and initial value
                 dimensionedScalar
                 (
                     "zeroAbscissa",
@@ -158,7 +173,7 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
                 )
             )
         );
-
+        // if using enxtended node, secondary nodes for velocity are initialized
         if (extended_)
         {
             // Allocating secondary quadrature only if the node is of extended 
@@ -175,8 +190,10 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
             );
 
             // Allocating secondary weights and abscissae
+            // for every secondary weights and abscissae 
             forAll(secondaryWeights_[dimi], sNodei)
             {
+                // create secondaryWeights_
                 secondaryWeights_[dimi].set
                 (
                     sNodei,
@@ -198,10 +215,11 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
                             IOobject::NO_WRITE
                         ),
                         mesh,
+                        // dimension less
                         dimensionedScalar("zeroWeight", dimless, Zero)
                     )
                 );
-
+                // create secondaryAbscissae_
                 secondaryAbscissae_[dimi].set
                 (
                     sNodei,
@@ -223,6 +241,7 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
                             IOobject::NO_WRITE
                         ),
                         mesh,
+                        // set dimension
                         dimensionedScalar
                         (
                             "zeroAbscissa",
@@ -248,6 +267,7 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
                         IOobject::NO_WRITE
                     ),
                     mesh,
+                    // sigma is dimension less
                     dimensionedScalar("zeroSigma", dimless, Zero)
                 )
             );
