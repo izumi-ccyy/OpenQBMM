@@ -40,6 +40,7 @@ Foam::velocityQuadratureNode<scalarType, vectorType>::velocityQuadratureNode
     const label nSecondaryNodes
 )
 :
+    // use construcor of quadratureNode to construct
     quadratureNode<scalarType, vectorType>
     (
         name,
@@ -50,10 +51,12 @@ Foam::velocityQuadratureNode<scalarType, vectorType>::velocityQuadratureNode
         extended,
         nSecondaryNodes
     ),
+    // construct velocityAbscissae_
+    // createVelocityAbscissae is commented in this file, and defined in surfaceVelocityNode and volVelocityNode
     velocityAbscissae_(createVelocityAbscissae(this->weight_))
 {}
 
-
+// similar to above and that in quadratureNode
 template<class scalarType, class vectorType>
 Foam::velocityQuadratureNode<scalarType, vectorType>::velocityQuadratureNode
 (

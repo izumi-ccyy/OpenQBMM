@@ -32,6 +32,25 @@
             4. [n 1](#n-1)
             5. [n 2](#n-2)
    2. [velocityQuadratureNode](#velocityquadraturenode)
+      1. [velocityQuadratureNode.H](#velocityquadraturenodeh)
+         1. [Description](#description-1)
+         2. [Include](#include-1)
+         3. [Inherit\](#inherit)
+         4. [Private data and functions](#private-data-and-functions)
+         5. [Public](#public-1)
+            1. [Constructors](#constructors-2)
+            2. [clone](#clone-2)
+            3. [iNew](#inew-1)
+            4. [Destructor](#destructor-2)
+            5. [Member functions](#member-functions-2)
+         6. [Finale include](#finale-include)
+      2. [velocityQuadratureNodeI.H](#velocityquadraturenodeih)
+      3. [velocityQuadratureNode.C](#velocityquadraturenodec)
+         1. [Constructors](#constructors-3)
+            1. [Constructor 1](#constructor-1-1)
+            2. [Constructor 2](#constructor-2-1)
+         2. [Destructor](#destructor-3)
+         3. [clone](#clone-3)
 
 ## quadratureNode
 
@@ -1315,3 +1334,292 @@ Foam::scalar Foam::quadratureNode<scalarType, vectorType>::n
 ```
 
 ## velocityQuadratureNode
+
+### velocityQuadratureNode.H
+
+#### Description
+Implementation of the velocity quadrature node.
+
+![inherit graph opf velocity quadrature node](./fig/class_foam_1_1velocity_quadrature_node__inherit__graph.png)
+
+#### Include
+
+```cpp
+#include "quadratureNode.H"
+#include "PtrList.H"
+#include "dictionary.H"
+#include "dictionaryEntry.H"
+#include "mappedList.H"
+```
+
+#### Inherit\
+
+```cpp
+template<class scalarType, class vectorType>
+class velocityQuadratureNode
+:
+    public quadratureNode<scalarType, vectorType>
+```
+
+#### Private data and functions
+
+```cpp
+// Private data
+
+    //- Primary abscissa of the node
+    vectorType velocityAbscissae_;
+
+
+// Private functions
+
+    //- Lookup boundary conditions and return velocity abscissae field
+    tmp<vectorType> createVelocityAbscissae
+    (
+        const scalarType& weight,
+        const wordList& boundaryTypes = wordList()
+    ) const;
+```
+
+#### Public
+
+##### Constructors
+
+```cpp
+//- Construct from name, mesh and dimensions
+velocityQuadratureNode
+(
+    const word& name,
+    const word& distributionName,
+    const fvMesh& mesh,
+    const dimensionSet& weightDimensions,
+    const PtrList<dimensionSet>& abscissaDimensions,
+    const wordList& boundaryTypes,
+    const bool extended = false,
+    const label nSecondaryNodes = 0
+);
+
+//- Construct from name, number of secondary nodes, mesh and dimensions
+velocityQuadratureNode
+(
+    const word& name,
+    const word& distributionName,
+    const fvMesh& mesh,
+    const dimensionSet& weightDimensions,
+    const PtrList<dimensionSet>& abscissaDimensions,
+    const bool extended = false,
+    const label nSecondaryNodes = 0
+);
+```
+
+##### clone
+
+```cpp
+//- Return clone
+autoPtr<velocityQuadratureNode<scalarType, vectorType>> clone() const;
+```
+
+##### iNew
+
+```cpp
+//- Return a pointer to a new quadrature node created on freestore
+//  from Istream
+class iNew
+{
+    const word distributionName_;
+    const fvMesh& mesh_;
+    const dimensionSet& weightDimensions_;
+    const PtrList<dimensionSet>& abscissaeDimensions_;
+    const wordList& boundaryTypes_;
+    const bool extended_;
+    const label nSecondaryNodes_;
+
+public:
+
+    iNew
+    (
+        const word& distributionName,
+        const fvMesh& mesh,
+        const dimensionSet& weightDimensions,
+        const PtrList<dimensionSet>& abscissaeDimensions,
+        const wordList& boundaryTypes,
+        const bool extended,
+        const label nSecondaryNodes
+    )
+    :
+        distributionName_(distributionName),
+        mesh_(mesh),
+        weightDimensions_(weightDimensions),
+        abscissaeDimensions_(abscissaeDimensions),
+        boundaryTypes_(boundaryTypes),
+        extended_(extended),
+        nSecondaryNodes_(nSecondaryNodes)
+    {}
+
+    autoPtr<velocityQuadratureNode<scalarType, vectorType>>
+    operator()
+    (
+        Istream& is
+    ) const
+    {
+        labelList ent(is);
+
+        return autoPtr<velocityQuadratureNode<scalarType, vectorType>>
+        (
+            new velocityQuadratureNode<scalarType, vectorType>
+            (
+                "node" + mappedList<scalar>::listToWord(ent),
+                distributionName_,
+                mesh_,
+                weightDimensions_,
+                abscissaeDimensions_,
+                boundaryTypes_,
+                extended_,
+                nSecondaryNodes_
+            )
+        );
+    }
+};
+```
+
+Declare and define a class `iNew` to return a pointer to velocity quadrature node.
+
+##### Destructor
+
+```cpp
+//- Destructor
+virtual ~velocityQuadratureNode();
+```
+
+##### Member functions
+
+```cpp
+// Access
+
+    //- Const access to the velocity abscissa of the node
+    virtual const vectorType& velocityAbscissae() const;
+
+    //- Non-const access to the velcity abscissa of the node
+    virtual vectorType& velocityAbscissae();
+```
+
+#### Finale include
+
+```cpp
+#ifdef NoRepository
+#   include "velocityQuadratureNodeI.H"
+#   include "velocityQuadratureNode.C"
+#endif
+```
+
+### velocityQuadratureNodeI.H
+
+```cpp
+template<class scalarType, class vectorType>
+const vectorType&
+Foam::velocityQuadratureNode<scalarType, vectorType>::velocityAbscissae() const
+{
+    return velocityAbscissae_;
+}
+
+template<class scalarType, class vectorType>
+vectorType&
+Foam::velocityQuadratureNode<scalarType, vectorType>::velocityAbscissae()
+{
+    return velocityAbscissae_;
+}
+```
+
+Define two member functions to return private data.
+
+### velocityQuadratureNode.C
+
+Two constructors, a destructor and a clone are defined here.
+
+#### Constructors
+
+##### Constructor 1
+
+```cpp
+template<class scalarType, class vectorType>
+Foam::velocityQuadratureNode<scalarType, vectorType>::velocityQuadratureNode
+(
+    const word& name,
+    const word& distributionName,
+    const fvMesh& mesh,
+    const dimensionSet& weightDimensions,
+    const PtrList<dimensionSet>& abscissaeDimensions,
+    const bool extended,
+    const label nSecondaryNodes
+)
+:
+    // use construcor of quadratureNode to construct
+    quadratureNode<scalarType, vectorType>
+    (
+        name,
+        distributionName,
+        mesh,
+        weightDimensions,
+        abscissaeDimensions,
+        extended,
+        nSecondaryNodes
+    ),
+    // construct velocityAbscissae_
+    // createVelocityAbscissae is commented in this file, and defined in surfaceVelocityNode and volVelocityNode
+    velocityAbscissae_(createVelocityAbscissae(this->weight_))
+{}
+```
+
+##### Constructor 2
+
+```cpp
+// similar to above and that in quadratureNode
+template<class scalarType, class vectorType>
+Foam::velocityQuadratureNode<scalarType, vectorType>::velocityQuadratureNode
+(
+    const word& name,
+    const word& distributionName,
+    const fvMesh& mesh,
+    const dimensionSet& weightDimensions,
+    const PtrList<dimensionSet>& abscissaeDimensions,
+    const wordList& boundaryTypes,
+    const bool extended,
+    const label nSecondaryNodes
+)
+:
+    quadratureNode<scalarType, vectorType>
+    (
+        name,
+        distributionName,
+        mesh,
+        weightDimensions,
+        abscissaeDimensions,
+        boundaryTypes,
+        extended,
+        nSecondaryNodes
+    ),
+    velocityAbscissae_(createVelocityAbscissae(this->weight_, boundaryTypes))
+{}
+```
+
+#### Destructor
+
+```cpp
+template<class scalarType, class vectorType>
+Foam::velocityQuadratureNode<scalarType, vectorType>::
+~velocityQuadratureNode()
+{}
+```
+
+#### clone
+
+```cpp
+template<class scalarType, class vectorType>
+Foam::autoPtr<Foam::velocityQuadratureNode<scalarType, vectorType>>
+Foam::velocityQuadratureNode<scalarType, vectorType>::clone() const
+{
+    notImplemented("velocityQuadratureNode::clone() const");
+    return nullptr; //autoPtr<velocityQuadratureNode<scalarType, vectorType>>(NULL);
+}
+```
+
+Do not implement.
