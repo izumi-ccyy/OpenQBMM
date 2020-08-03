@@ -284,11 +284,12 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
     const fvMesh& mesh,
     const dimensionSet& weightDimensions,
     const PtrList<dimensionSet>& abscissaeDimensions,
-    const wordList& boundaryTypes,
+    const wordList& boundaryTypes,  // added to constructor 1
     const bool extended,
     const label nSecondaryNodes
 )
 :
+    // add boundaryTypes to create IOobject
     name_(IOobject::groupName(name, distributionName)),
     weight_
     (

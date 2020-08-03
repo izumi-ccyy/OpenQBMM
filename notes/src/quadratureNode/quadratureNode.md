@@ -847,6 +847,247 @@ Foam::quadratureNode<scalarType, vectorType>::quadratureNode
 
 ##### Constructor 2
 
+```cpp
+template<class scalarType, class vectorType>
+Foam::quadratureNode<scalarType, vectorType>::quadratureNode
+(
+    const word& name,
+    const word& distributionName,
+    const fvMesh& mesh,
+    const dimensionSet& weightDimensions,
+    const PtrList<dimensionSet>& abscissaeDimensions,
+    const wordList& boundaryTypes,  // added to constructor 1
+    const bool extended,
+    const label nSecondaryNodes
+)
+:
+    // add boundaryTypes to create IOobject
+    name_(IOobject::groupName(name, distributionName)),
+    weight_
+    (
+        IOobject
+        (
+            IOobject::groupName("weight", name_),
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensioned<typename weightType::value_type>
+        (
+            "zeroWeight",
+            weightDimensions,
+            pTraits<typename weightType::value_type>::zero
+        ),
+        boundaryTypes
+    ),
+    abscissae_(),
+    scalarIndexes_(),
+    velocityIndexes_(),
+    sizeIndex_(-1),
+    lengthBased_(false),
+    massBased_(false),
+    useVolumeFraction_(false),
+    secondaryWeights_(),
+    secondaryAbscissae_(),
+    sigmas_(),
+    nSecondaryNodes_(nSecondaryNodes),
+    extended_(extended)
+{
+    if (weightDimensions == dimless)
+    {
+        useVolumeFraction_ = true;
+    }
+
+    forAll(abscissaeDimensions, dimi)
+    {
+        if (abscissaeDimensions[dimi] == dimVelocity)
+        {
+            velocityIndexes_.append(dimi);
+        }
+        else
+        {
+            scalarIndexes_.append(dimi);
+
+            if
+            (
+                (abscissaeDimensions[dimi] == dimMass)
+             || (abscissaeDimensions[dimi] == dimVolume)
+             || (abscissaeDimensions[dimi] == dimLength)
+            )
+            {
+                if (sizeIndex_ != -1)
+                {
+                    FatalErrorInFunction
+                        << "Only one abscissae can be sized based."
+                        << abort(FatalError);
+                }
+
+                sizeIndex_ = dimi;
+
+                if (abscissaeDimensions[dimi] == dimLength)
+                {
+                    lengthBased_ = true;
+                }
+                else if (abscissaeDimensions[dimi] == dimMass)
+                {
+                    massBased_ = true;
+                    word rhoName = 
+                        IOobject::groupName
+                        (
+                            "thermo:rho", 
+                            IOobject::group(name_)
+                        );
+
+                    if (mesh.foundObject<volScalarField>(rhoName))
+                    {
+                        rhoPtr_ = &mesh.lookupObject<volScalarField>(rhoName);
+                    }
+                }
+            }
+        }
+    }
+
+    abscissae_.resize(scalarIndexes_.size());
+
+    if (extended_)
+    {
+        secondaryWeights_.resize(scalarIndexes_.size());
+        secondaryAbscissae_.resize(scalarIndexes_.size());
+        sigmas_.resize(scalarIndexes_.size());
+    }
+
+    forAll(abscissae_, dimi)
+    {
+        label cmpt = scalarIndexes_[dimi];
+        abscissae_.set
+        (
+            dimi,
+            new abscissaType
+            (
+                IOobject
+                (
+                    IOobject::groupName("abscissa" + Foam::name(dimi), name_),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar
+                (
+                    "zeroAbscissa",
+                    abscissaeDimensions[cmpt],
+                    Zero
+                ),
+                boundaryTypes
+            )
+        );
+
+        if (extended_)
+        {
+            // Allocating secondary quadrature only if the node is of extended 
+            // type
+            secondaryWeights_.set
+            (
+                dimi,
+                new PtrList<weightType>(nSecondaryNodes_)
+            );
+
+            secondaryAbscissae_.set
+            (
+                dimi,
+                new abscissaeType(nSecondaryNodes_)
+            );
+
+            // Allocating secondary weights and abscissae
+            forAll(secondaryWeights_[dimi], sNodei)
+            {
+                secondaryWeights_[dimi].set
+                (
+                    sNodei,
+                    new weightType
+                    (
+                        IOobject
+                        (
+                            IOobject::groupName
+                            (
+                                "secondaryWeight"
+                              + Foam::name(dimi)
+                              + '.'
+                              + Foam::name(sNodei),
+                                name_
+                            ),
+                            mesh.time().timeName(),
+                            mesh,
+                            IOobject::NO_READ,
+                            IOobject::NO_WRITE
+                        ),
+                        mesh,
+                        dimensionedScalar("zeroWeight", dimless, Zero),
+                        boundaryTypes
+                    )
+                );
+
+                secondaryAbscissae_[dimi].set
+                (
+                    sNodei,
+                    new abscissaType
+                    (
+                        IOobject
+                        (
+                            IOobject::groupName
+                            (
+                                "secondaryAbscissa"
+                              + Foam::name(dimi)
+                              + '.'
+                              + Foam::name(sNodei),
+                                name_
+                            ),
+                            mesh.time().timeName(),
+                            mesh,
+                            IOobject::NO_READ,
+                            IOobject::NO_WRITE
+                        ),
+                        mesh,
+                        dimensionedScalar
+                        (
+                            "zeroAbscissa",
+                            abscissaeDimensions[cmpt],
+                            Zero
+                        ),
+                    boundaryTypes
+                    )
+                );
+            }
+
+            // Allocating sigma
+            sigmas_.set
+            (
+                dimi,
+                new sigmaType
+                (
+                    IOobject
+                    (
+                        IOobject::groupName("sigma", name_),
+                        mesh.time().timeName(),
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    mesh,
+                    dimensionedScalar("zeroSigma", dimless, Zero),
+                    boundaryTypes
+                )
+            );
+        }
+    }
+}
+```
+
+Add `boundaryTypes` to create IOobject, others keep unchanged. 
+
 #### Destructor
 
 ```cpp
