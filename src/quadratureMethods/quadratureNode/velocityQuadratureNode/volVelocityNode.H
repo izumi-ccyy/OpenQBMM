@@ -34,7 +34,7 @@ License
 
 namespace Foam
 {
-
+// createVelocityAbscissae for volume variables
 template<>
 tmp<volVectorField>
 velocityQuadratureNode<volScalarField, volVectorField>::createVelocityAbscissae

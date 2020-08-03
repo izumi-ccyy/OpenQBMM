@@ -44,7 +44,7 @@ SourceFiles
 
 namespace Foam
 {
-
+// createVelocityAbscissae for surface variables
 template<>
 tmp<surfaceVectorField>
 velocityQuadratureNode<surfaceScalarField, surfaceVectorField>::

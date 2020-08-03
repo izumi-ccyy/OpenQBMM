@@ -51,6 +51,12 @@
             2. [Constructor 2](#constructor-2-1)
          2. [Destructor](#destructor-3)
          3. [clone](#clone-3)
+   3. [surfaceVelocityNode](#surfacevelocitynode)
+      1. [surfaceVelocityNode.H](#surfacevelocitynodeh)
+      2. [surfaceVelocityNode.C](#surfacevelocitynodec)
+   4. [volVelocityNode](#volvelocitynode)
+      1. [volVelocityNode.H](#volvelocitynodeh)
+      2. [volVelocityNode.C](#volvelocitynodec)
 
 ## quadratureNode
 
@@ -1623,3 +1629,162 @@ Foam::velocityQuadratureNode<scalarType, vectorType>::clone() const
 ```
 
 Do not implement.
+
+## surfaceVelocityNode
+
+### surfaceVelocityNode.H
+
+```cpp
+// createVelocityAbscissae for surface variables
+template<>
+tmp<surfaceVectorField>
+velocityQuadratureNode<surfaceScalarField, surfaceVectorField>::
+createVelocityAbscissae
+(
+    const surfaceScalarField& weight,
+    const wordList& boundaryTypes
+) const;
+```
+
+### surfaceVelocityNode.C
+
+```cpp
+template<>
+tmp<surfaceVectorField>
+velocityQuadratureNode<surfaceScalarField, surfaceVectorField>::
+createVelocityAbscissae
+(
+    const surfaceScalarField& weight,
+    const wordList& boundaryTypes
+) const
+{
+    // get mesh
+    const fvMesh& mesh = weight.mesh();
+    // create abscissae with and without boundary conditions
+    if (boundaryTypes.size() == 0)
+    {
+        return tmp<surfaceVectorField>
+        (
+            new surfaceVectorField
+            (
+                IOobject
+                (
+                    IOobject::groupName("velocityAbscissae", this->name_),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedVector
+                (
+                    "zeroVelocityAbscissa",
+                    dimVelocity,
+                    Zero
+                )
+            )
+        );
+    }
+
+    return tmp<surfaceVectorField>
+    (
+        new surfaceVectorField
+        (
+            IOobject
+            (
+                IOobject::groupName("velocityAbscissae", this->name_),
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedVector
+            (
+                "zeroVelocityAbscissa",
+                dimVelocity,
+                Zero
+            ),
+            boundaryTypes
+        )
+    );
+}
+```
+## volVelocityNode
+
+### volVelocityNode.H
+
+```cpp
+// createVelocityAbscissae for volume variables
+template<>
+tmp<volVectorField>
+velocityQuadratureNode<volScalarField, volVectorField>::createVelocityAbscissae
+(
+    const volScalarField& weight,
+    const wordList& boundaryTypes
+) const;
+```
+
+### volVelocityNode.C
+
+```cpp
+// similar to that for surface variables
+template<>
+tmp<volVectorField>
+velocityQuadratureNode<volScalarField, volVectorField>::
+createVelocityAbscissae
+(
+    const volScalarField& weight,
+    const wordList& boundaryTypes
+) const
+{
+    const fvMesh& mesh = weight.mesh();
+    word UName = IOobject::groupName("U", weight.group());
+
+    if (mesh.foundObject<volVectorField>(UName) && boundaryTypes.size() > 0)
+    {
+        const volVectorField& Umean =
+            mesh.lookupObject<volVectorField>(UName);
+
+        return tmp<volVectorField>
+        (
+            new volVectorField
+            (
+                IOobject
+                (
+                    IOobject::groupName("velocityAbscissae", this->name_),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                Umean,
+                Umean.boundaryField()
+            )
+        );
+    }
+
+    return tmp<volVectorField>
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                IOobject::groupName("velocityAbscissae", this->name_),
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedVector
+            (
+                "zeroVelocityAbscissa",
+                dimVelocity,
+                Zero
+            ),
+            boundaryTypes
+        )
+    );
+}
+```

@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-
+// similar to that for surface variables
 template<>
 tmp<volVectorField>
 velocityQuadratureNode<volScalarField, volVectorField>::

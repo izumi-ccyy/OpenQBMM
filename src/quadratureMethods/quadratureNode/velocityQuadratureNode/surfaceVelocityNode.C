@@ -42,8 +42,9 @@ createVelocityAbscissae
     const wordList& boundaryTypes
 ) const
 {
+    // get mesh
     const fvMesh& mesh = weight.mesh();
-
+    // create abscissae with and without boundary conditions
     if (boundaryTypes.size() == 0)
     {
         return tmp<surfaceVectorField>
